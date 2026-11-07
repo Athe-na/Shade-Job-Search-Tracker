@@ -7,7 +7,7 @@
 body {
     margin: 0;
     font-family: 'Arimo', Arial, sans-serif;
-    background-color: #eae7df;
+    background-color: #f8f6f0;
     color: #222222;
 }
 
@@ -21,24 +21,110 @@ body {
 .sidebar {
     width: 240px;
     flex-shrink: 0;
-    background-color: #e5e1d5;
+    background-color: #eae7df;
     border-right: 1px solid #D8DBE0;
-    padding: 25px;
+    padding: 15px 12px;
 }
 
 .sidebar h1 {
     font-size: 26px;
-    margin: 0 0 35px;
+    margin: 0 0 14px;
+    font-weight: 700;
 }
 
-.sidebar h3 {
-    font-size: 13px;
-    margin-top: 30px;
+/* Rounded Sidebar Cards */
+.sidebar-card {
+    background-color: #f8f6f0;
+    border: 1px solid #D8DBE0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
 }
 
-.sidebar p {
+.sidebar-card h3 {
     font-size: 12px;
-    margin: 12px 0;
+    font-weight: 700;
+    margin: 0 0 10px;
+}
+
+/* Status Rows */
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 7px 0;
+    font-size: 12px;
+}
+
+/* Colored Dots */
+.dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.applied-dot {
+    background-color: #7665d9;
+}
+
+.review-dot {
+    background-color: #3a9ee6;
+}
+
+.qa-dot {
+    background-color: #C7A42B;
+}
+
+.interview-dot {
+    background-color: #D89A31;
+}
+
+.declined-dot {
+    background-color: #C45B3A;
+}
+
+.accepted-dot {
+    background-color: #4D9865;
+}
+
+/* Search Statistics */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin: 7px 0;
+    font-size: 12px;
+    color: #666666;
+}
+
+.stat-row strong {
+    color: #222222;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Keyboard Shortcuts */
+.shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 11px;
+    color: #666666;
+}
+
+kbd {
+    background-color: #eae7df;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    color: #333333;
+    white-space: nowrap;
 }
 
 /* Main Content */
@@ -76,10 +162,23 @@ button {
     cursor: pointer;
 }
 
+button:hover {
+    background-color: #f0eef9;
+}
+
+button:focus-visible {
+    outline: 3px solid #3922A7;
+    outline-offset: 2px;
+}
+
 .add-btn {
     background-color: #3922A7;
     color: white;
     border: none;
+}
+
+.add-btn:hover {
+    background-color: #291780;
 }
 
 /* Filters */
@@ -96,6 +195,12 @@ button {
     font-size: 11px;
     border-radius: 20px;
     padding: 7px 12px;
+}
+
+.filters button.active-filter {
+    background-color: #3922A7;
+    color: white;
+    border-color: #3922A7;
 }
 
 /* Calendar */
@@ -139,35 +244,35 @@ button {
     margin: 0;
 }
 
-/* Status Colors */
+/* Job Status Colors */
 .applied {
-    background-color: #DEDBF4;
-    border-color: #958BD0;
+    background-color: #7665d95f;
+    border-color: #7665d9;
 }
 
 .review {
-    background-color: #D9EAF7;
-    border-color: #87B3D6;
+    background-color: #3a9ee651;
+    border-color: #3a9ee6;
 }
 
 .qa {
-    background-color: #F0E9C7;
-    border-color: #C7B56A;
+    background-color: #e1bb3064;
+    border-color: #C7A42B;
 }
 
 .interview {
-    background-color: #F5DCC8;
-    border-color: #D89A71;
+    background-color: #e79f236f;
+    border-color: #D89A31;
 }
 
 .declined {
-    background-color: #F1DFD7;
-    border-color: #C79B8C;
+    background-color: #e551244d;
+    border-color: #C45B3A;
 }
 
 .accepted {
-    background-color: #D6EDDF;
-    border-color: #8BBD9C;
+    background-color: #4d986561;
+    border-color: #4D9865;
 }
 
 /* Smaller Screens */
