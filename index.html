@@ -1,3 +1,4 @@
+<!-- Authored by Z Wang, Elda Shatro, Athena Osborne, [add your name here if you work on this]-->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -85,12 +86,12 @@
             <h3>Keyboard shortcuts</h3>
 
             <div class="shortcut-row">
-                <kbd>Alt+E</kbd>
+                <kbd>Alt+Q</kbd>
                 <span>New application</span>
             </div>
 
             <div class="shortcut-row">
-                <kbd>Alt+F</kbd>
+                <kbd>Alt+S</kbd>
                 <span>Filter by status</span>
             </div>
 
@@ -122,15 +123,15 @@
             <h2>Jul - Oct 2026</h2>
 
             <div class="buttons">
-                <button id="settings-btn">
+                <button id="settings-btn" onclick="openSettingsPanel()">
                     Settings
                 </button>
 
-                <button id="analytics-btn">
+                <button id="analytics-btn" onclick="openAnalyticsPanel()">
                     Analytics
                 </button>
 
-                <button id="add-btn" class="add-btn">
+                <button id="add-btn" class="add-btn" onclick="createNewApplication()">
                     + Add Application
                 </button>
             </div>
@@ -215,7 +216,7 @@
             <section class="month">
                 <h3>October 2026</h3>
 
-                <div class="job applied"></div>
+                <div class="job applied">Testing testing</div>
                 <div class="job interview"></div>
                 <div class="job applied"></div>
                 <div class="job review"></div>

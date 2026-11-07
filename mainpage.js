@@ -8,7 +8,7 @@ class Application {
      * @param {string} company 
      * @param {string} location 
      * @param {string} applicationLink 
-     * @param {int} dateApplied - The date applied. Formatted as a yymmdd integer for easy comparison.
+     * @param {Date} dateApplied - The date applied. Pass a date object.
      * @param {string} appliedVia 
      * @param {int} status - The status of the application. Ranges from 0 to 5. 0: Applied. 1: Under Review. 2: QA. 3: Interview. 4: Accepted. 5: Rejected.
      * 
@@ -18,9 +18,9 @@ class Application {
         this.company = company; // String
         this.location = location; // String
         this.applicationLink = applicationLink; // String
-        this.dateApplied = dateApplied; // Int
+        this.dateApplied = dateApplied; // Date
         this.appliedVia = appliedVia;
-        this.status = status;
+        this.status = status; // Int
         return this;
     }
 
@@ -30,17 +30,94 @@ class Application {
      * @returns {boolean} True if caller date >= passed date. False if caller date < passed date.
      */
     compareDateApplied(other) {
-        return this.dateApplied >= other.dateApplied;
+        return this.dateApplied.getTime() >= other.dateApplied.getTime();
     }
 }
 
-// Global applications array used as primary data structure in the backend.
+
+// --- APPLICATION DATA MANIPULATION ---
+
+/**
+ * The array of ALL applications the user has created.
+ */
 var applications = [];
 
-window.openAnalyticsPanel = function() {
-    console.log("Opening analytics panel")
+/**
+ * The array of applications which will be currently displayed.
+ */
+var currentlyDisplayedApplications = [];
+
+/**
+ * Filtering function for the applications array by date.
+ * @param {Array[Application]} inputApplications - The applications to filter.
+ * @param {Date} date - The date to use as the cutoff. Inclusive.
+ * @param {boolean} bAfter - Whether to filter by applications before or after the date. True: After, False: Before.
+ * @returns Array of applications fitting the filter.
+ */
+function filterApplicationsByDate(inputApplications, date, bAfter) {
+    return inputApplications.filter((application) => bAfter ? application.dateApplied.getTime() >= date.getTime() : application.dateApplied.getTime() <= date.getTime());
 }
 
+/**
+ * Filtering function for the applications array by status.
+ * @param {Array[Application]} inputApplications - The applications to filter.
+ * @param {int} status - The status of the application to use as the cutoff. Inclusive.
+ * @param {boolean} bAfter - Whetther to filter by statuses higher or lower the input. True: After, False: Before.
+ * @returns Array of applications fitting the filter.
+ */
+function filterApplicationsByStatus(inputApplications, status, bAfter) {
+    return inputApplications.filter((application) => bAfter ? application.status >= status : application.status <= status);
+}
+
+/**
+ * @param {Array[Application]} inputApplications - The applications to sort.
+ * @param {boolean} bAscending - Whether to sort ascending or descending. True: Ascending, False: Descending.
+ * @returns The applications array, sorted by status.
+ */
+function sortApplicationsByStatus(inputApplications, bAscending) {
+    return inputApplications.toSorted((a, b) => bAscending ? a.status - b.status : b.status - a.status);
+}
+
+function refreshHomePageFromCurrentlyDisplayedApplications() {
+    // TODO: Implement behavior for reading currentlyDisplayedApplications to the home page.
+}
+
+
+// --- BUTTON FUNCTIONALITY --- 
+
+window.setStatusFilter = function(status) {
+    // TODO: Implement behavior for changing the visually active status filter, changing the currentlyDisplayedApplications, and refreshing the home page from the currently displayed applications.
+
+    refreshHomePageFromCurrentlyDisplayedApplications();
+}
+
+window.openAnalyticsPanel = function() {
+    console.log("Opening analytics panel.");
+    // TODO: Make the analytics panel visible, (optionally) play the opening animation, and defocus the home page.
+}
+
+window.closeAnalyticsPanel = function() {
+    console.log("Closing the analytics panel.");
+    // TODO: Hide the analytics panel, (optionally) play the closing animation, and refocus the home page.
+}
+
+window.openSettingsPanel = function() {
+    console.log("Opening settings panel.");
+    // TODO: Make the settings panel visible, (optionally) play the opening animation, and defocus the home page.
+}
+
+window.closeSettingsPanel = function() {
+    console.log("Closing the settings panel.");
+    // TODO: Hide the settings panel, (optionally) play the closing animation, and refocus the home page.
+}
+
+window.openApplicationPanel = function() {
+    console.log("Opening the application panel.");
+}
+
+/**
+ * NOT CURRENTLY IN USE.
+ */
 window.createNewApplication = function() {
     console.log("Creating a new application.");
     var testApplication = new Application(
@@ -52,6 +129,10 @@ window.createNewApplication = function() {
         "Indeed",
         1);
     applications.push(testApplication);
+}
+
+window.saveCurrentApplication = function(positionTitle = "", company = "", location = "", applicationLink = "", dateApplied = new Date(), appliedVia, status) {
+    applications.push(new Application())
 }
 
 window.saveApplications = function() {
@@ -67,6 +148,9 @@ window.clearApplications = function() {
     clearApplicationsInLocalStorage();
     applications = [];
 }
+
+
+// --- STORAGE FUNCTIONALITY ---
 
 /**
  * Attempts to retrieve the stored application data if it exists.
@@ -102,13 +186,49 @@ function clearApplicationsInLocalStorage() {
     console.log("Cleared localStorage successfully.");
 }
 
+// --- EVENT HANDLING ---
+
+/**
+ * Adds event listeners for the keyboard shortcuts supported by Shade.
+ */
+function addKeyboardEventListeners() {
+    window.addEventListener("keydown", function (e)
+    {
+        if (e.key == "q" && e.altKey) {
+            console.log("Keyboard shortcut: Creating new application.");
+            window.openApplicationPanel();
+        }
+        if (e.key == "s" && e.altKey) {
+            console.log("Keyboard shortcut: Sorting applications by status.");
+            sortApplicationsByStatus(applications);
+        }
+        if (e.key == "a" && e.altKey) {
+            console.log("Keyboard shortcut: Opening analytics panel.");
+            window.openAnalyticsPanel();
+        }
+        if (e.key == "w" && e.altKey) {
+            console.log("Keyboard shortcut: Opening settings panel.");
+            window.openAnalyticsPanel();
+        }
+        if (e.key == "Tab") {
+            console.log("Keyboard shortcut: Advance field.");
+            // TODO: Implement function with defined behavior for field advancing. 
+        }
+    });
+}
+
+// --- INITIALIZATION ---
+
 function initialize() {
     console.log("Initializing Shade.");
 
     // Perform startup taks.
     getDataFromLocalStorage();
     displayApplicationsInConsole();
+    addKeyboardEventListeners();
     // Folake this would be a good place to create some test data.
+
+    currentlyDisplayedApplications = applications;
 }
 
 window.onload = initialize();
