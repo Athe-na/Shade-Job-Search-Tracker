@@ -1,4 +1,4 @@
-// Authored by Athena Osborne, [add your name here if you work on this]
+// Authored by Athena Osborne, Folake Oluewu, [add your name here if you work on this]
 
 class Application {
 
@@ -183,6 +183,12 @@ function getDataFromLocalStorage() {
     if (locallyStoredApplicationsJSON) {
         // If so, pass it into the applications array.
         applications = JSON.parse(locallyStoredApplicationsJSON);
+
+        // Convert saved date strings back into Date objects.
+        applications.forEach((application) => {
+            application.dateApplied = new Date(application.dateApplied);
+        });
+
         console.log("Retrieved data from localStorage and passed it into the applications array.")
         return;
     }
@@ -246,6 +252,141 @@ function addKeyboardEventListeners() {
     });
 }
 
+function createTestData() {
+    applications = [
+        new Application(
+            "UX Designer Intern",
+            "Pinterest",
+            "New York City, NY",
+            "https://careers.pinterest.com",
+            new Date("2026-08-18"),
+            "Linkedin",
+            0
+        ),
+        
+        new Application(
+            "Volleyball Coach",
+            "Walt Disney Magnet School",
+            "Chicago, IL",
+            "https://careers.disney.com",
+            new Date("2026-08-01"),
+            "Handshake",
+            1
+        ),
+        
+        new Application(
+            "Design Engineer",
+            "CTA",
+            "Chicago, IL",
+            "https://careers.cta.com",
+            new Date("2026-07-27"),
+            "Linkedin",
+            0
+        ),
+        
+        new Application(
+            "Fabrication Lab Aide",
+            "Chicago Public Library",
+            "Chicago, IL",
+            "https://careers.fablab.com",
+            new Date("2026-07-19"),
+            "Indeed",
+            2
+        ),
+       
+        new Application(
+            "Software Engineer Lead",
+            "Google",
+            "New York City, NY",
+            "https://careers.google.com",
+            new Date("2026-10-10"),
+            "Linkedin",
+            3
+        ),
+       
+        new Application(
+            "Product Manager",
+            "Instagram",
+            "Chicago, IL",
+            "https://careers.instagram.com",
+            new Date("2026-10-23"),
+            "Handshake",
+            4
+        ),
+      
+        new Application(
+            "Yoga Instructor",
+            "Yoga Box",
+            "New York City, NY",
+            "https://careers.yogabox.com",
+            new Date("2026-09-04"),
+            "Indeed",
+            5
+        )
+    ];
+}
+
+function displayApplicationsOnCalendar() {
+
+    // Find the calendar on the webpage.
+    var calendar = document.querySelector("#calendar");
+
+    console.log("Calendar element:", calendar);
+
+    // Clear existing calendar content.
+    calendar.innerHTML = "";
+
+    // Create the four month sections.
+    var months = ["July", "August", "September", "October"];
+
+    months.forEach((month) => {
+
+        var monthSection = document.createElement("section");
+        monthSection.classList.add("month");
+
+        var monthHeading = document.createElement("h3");
+        monthHeading.innerHTML = month + " 2026";
+
+        monthSection.appendChild(monthHeading);
+
+        calendar.appendChild(monthSection);
+    });
+
+    // Add each application to its corresponding month.
+    applications.forEach((application) => {
+
+        var monthIndex = application.dateApplied.getMonth();
+
+        // Only display applications from July through October.
+        if (monthIndex < 6 || monthIndex > 9) {
+            return;
+        }
+
+        var monthSection = calendar.children[monthIndex - 6];
+
+        var jobCard = document.createElement("div");
+
+        // Match the application status to its CSS class.
+        var statusClasses = [
+            "applied",
+            "review",
+            "qa",
+            "interview",
+            "accepted",
+            "declined"
+        ];
+
+        jobCard.classList.add("job", statusClasses[application.status]);
+
+        jobCard.innerHTML = `
+            <h4>${application.positionTitle}</h4>
+            <p>${application.company}</p>
+        `;
+
+        monthSection.appendChild(jobCard);
+    });
+}
+
 // --- INITIALIZATION ---
 
 function initialize() {
@@ -253,12 +394,22 @@ function initialize() {
 
     // Perform startup taks.
     getDataFromLocalStorage();
+
+    // Only create test data if no applications exist.
+    if (applications.length === 0) {
+        createTestData();
+        saveApplicationsToLocalStorage();
+    }
+
+    // Set the applications that should currently be displayed.
+    currentlyDisplayedApplications = applications;
+
+    displayApplicationsOnCalendar();
     displayApplicationsInConsole();
     addKeyboardEventListeners();
     refreshYourSearchSummary();
     // Folake this would be a good place to create some test data.
-
-    currentlyDisplayedApplications = applications;
 }
 
-window.onload = initialize();
+window.onload = initialize;
+//window.applications = applications;
