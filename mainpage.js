@@ -82,6 +82,21 @@ function refreshHomePageFromCurrentlyDisplayedApplications() {
     // TODO: Implement behavior for reading currentlyDisplayedApplications to the home page.
 }
 
+/**
+ * Calculates and sets the values for the 'Your Search' side widget.
+ */
+function refreshYourSearchSummary() {
+    // Grab fields
+    var totalApplicationsField = document.querySelector("#total-applications");
+    var reachedInterviewField = document.querySelector("#total-interviews");
+    var declinedField = document.querySelector("#total-declined");
+
+    // Fill in info
+    totalApplicationsField.innerHTML = applications.length;
+    reachedInterviewField.innerHTML = filterApplicationsByStatus(applications, 3, true).length;
+    declinedField.innerHTML = filterApplicationsByStatus(applications, 5, true).length;
+}
+
 
 // --- BUTTON FUNCTIONALITY --- 
 
@@ -113,6 +128,12 @@ window.closeSettingsPanel = function() {
 
 window.openApplicationPanel = function() {
     console.log("Opening the application panel.");
+    // TODO: Make the application panel visible, (optionally) play tthe opening animation, and defocus the home page.
+}
+
+window.closeApplicationPanel = function() {
+    console.log("Closing the application panel.");
+    // TODO: Hide the application panel, (optionally) play the closing animation, and refocus the home page.
 }
 
 /**
@@ -131,8 +152,8 @@ window.createNewApplication = function() {
     applications.push(testApplication);
 }
 
-window.saveCurrentApplication = function(positionTitle = "", company = "", location = "", applicationLink = "", dateApplied = new Date(), appliedVia, status) {
-    applications.push(new Application())
+window.saveCurrentApplication = function(positionTitle = "", company = "", location = "", applicationLink = "", dateApplied = new Date(), appliedVia = "", status = 0) {
+    applications.push(new Application());
 }
 
 window.saveApplications = function() {
@@ -144,9 +165,10 @@ window.displayApplicationsInConsole = function() {
     console.log(applications);
 }
 
-window.clearApplications = function() {
+window.clearAllApplicationsEverywhere = function() {
     clearApplicationsInLocalStorage();
     applications = [];
+    currentlyDisplayedApplications = [];
 }
 
 
@@ -197,6 +219,9 @@ function addKeyboardEventListeners() {
         if (e.key == "q" && e.altKey) {
             console.log("Keyboard shortcut: Creating new application.");
             window.openApplicationPanel();
+            createNewApplication();
+            displayApplicationsInConsole();
+            refreshYourSearchSummary();
         }
         if (e.key == "s" && e.altKey) {
             console.log("Keyboard shortcut: Sorting applications by status.");
@@ -214,6 +239,10 @@ function addKeyboardEventListeners() {
             console.log("Keyboard shortcut: Advance field.");
             // TODO: Implement function with defined behavior for field advancing. 
         }
+        // if (e.key == "O") {
+        //     console.log("Debug keyboard shortcut: clearing localStorage.");
+        //     clearApplications();
+        // }
     });
 }
 
@@ -226,6 +255,7 @@ function initialize() {
     getDataFromLocalStorage();
     displayApplicationsInConsole();
     addKeyboardEventListeners();
+    refreshYourSearchSummary();
     // Folake this would be a good place to create some test data.
 
     currentlyDisplayedApplications = applications;
