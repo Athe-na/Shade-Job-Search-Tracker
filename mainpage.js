@@ -179,12 +179,12 @@ window.closeApplicationPanel = function() {
 
 window.openAnalyticsPanel = function() {
     console.log("Opening analytics panel.");
-    // TODO: Make the analytics panel visible, (optionally) play the opening animation, and defocus the home page.
+    document.getElementById("analytics-panel").hidden = false;
 }
 
 window.closeAnalyticsPanel = function() {
     console.log("Closing the analytics panel.");
-    // TODO: Hide the analytics panel, (optionally) play the closing animation, and refocus the home page.
+    document.getElementById("analytics-panel").hidden = true;
 }
 
 window.openDeleteConfirm = function() {
