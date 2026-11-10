@@ -131,7 +131,7 @@
                     Analytics
                 </button>
 
-                <button id="add-btn" class="add-btn" onclick="createNewApplication()">
+                <button id="add-btn" class="add-btn" onclick="openApplicationPanel()">
                     + Add Application
                 </button>
             </div>
@@ -229,5 +229,366 @@
 
 </div>
 
+<!-- Edit Application Panel -->
+<div id="application-panel" class="modal-overlay" hidden>
+    <form id="application-form" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="application-panel-title">
+
+        <!-- Header -->
+        <div class="modal-header">
+            <h2 id="application-panel-title">Edit application</h2>
+            <button type="button" class="icon-btn" aria-label="Close" onclick="closeApplicationPanel()">
+                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body app-body">
+            <!-- Fields -->
+            <div class="field-grid">
+                <label class="field">
+                    <span class="field-label">Position title <span class="hint">(required)</span></span>
+                    <input name="positionTitle" type="text" value="Medical Office Assistant" required autocomplete="off">
+                </label>
+                <label class="field">
+                    <span class="field-label">Company <span class="hint">(required)</span></span>
+                    <input name="company" type="text" value="Northwestern Medicine" required autocomplete="off">
+                </label>
+                <label class="field">
+                    <span class="field-label">Location <span class="hint">(optional)</span></span>
+                    <input name="location" type="text" value="Chicago, IL" autocomplete="off">
+                </label>
+                <label class="field">
+                    <span class="field-label">Application link <span class="hint">(optional)</span></span>
+                    <input name="applicationLink" type="text" value="northwestern.com" inputmode="url" autocomplete="off">
+                </label>
+                <label class="field">
+                    <span class="field-label">Date applied <span class="hint">(filled in for you)</span></span>
+                    <input name="dateApplied" type="date" value="2026-10-06">
+                </label>
+                <label class="field">
+                    <span class="field-label">Applied via <span class="hint">(optional)</span></span>
+                    <input name="appliedVia" type="text" value="Company website" autocomplete="off">
+                </label>
+                <p class="form-error" id="application-error" role="alert" hidden></p>
+            </div>
+
+            <!-- Status -->
+            <fieldset class="status-panel">
+                <legend>Status</legend>
+                <ol class="stepper">
+                    <li class="step" style="--c: #7665d9">
+                        <label><input class="sr-only" type="radio" name="status" value="0" checked><span class="step-circle"></span><span class="step-label">Applied</span></label>
+                    </li>
+                    <li class="step" style="--c: #3a9ee6">
+                        <label><input class="sr-only" type="radio" name="status" value="1"><span class="step-circle"></span><span class="step-label">Under Review</span></label>
+                    </li>
+                    <li class="step" style="--c: #c7a42b">
+                        <label><input class="sr-only" type="radio" name="status" value="2"><span class="step-circle"></span><span class="step-label">QA</span></label>
+                    </li>
+                    <li class="step" style="--c: #d89a31">
+                        <label><input class="sr-only" type="radio" name="status" value="3"><span class="step-circle"></span><span class="step-label">Interview</span></label>
+                    </li>
+                    <li class="step step-outcome">
+                        <div class="step-row"><span class="step-circle"></span><span class="step-label">Outcome</span></div>
+                        <div class="outcome-options">
+                            <label class="outcome-pill" style="--c: #4d9865"><input class="sr-only" type="radio" name="status" value="4"><span>Accepted</span></label>
+                            <label class="outcome-pill" style="--c: #c45b3a"><input class="sr-only" type="radio" name="status" value="5"><span>Declined</span></label>
+                        </div>
+                    </li>
+                </ol>
+            </fieldset>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <button type="button" class="danger-btn" id="delete-btn" onclick="openDeleteConfirm()">
+                <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.8 6.5v4.5M9.2 6.5v4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Delete
+            </button>
+            <div class="footer-right">
+                <button type="button">Cancel</button>
+                <button type="button" class="primary-dark" onclick="saveCurrentApplication()">Save</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Shortcuts -->
+    <aside class="modal-shortcuts" aria-label="Shortcuts">
+        <h3>Shortcuts</h3>
+        <div class="shortcut-row"><kbd>Tab</kbd><span>Next field</span></div>
+        <div class="shortcut-row"><kbd>&larr; &rarr;</kbd><span>Status</span></div>
+        <div class="shortcut-row"><kbd>Alt+S</kbd><span>Save</span></div>
+        <div class="shortcut-row"><kbd>Alt+D</kbd><span>Delete</span></div>
+        <div class="shortcut-row"><kbd>Esc</kbd><span>Close</span></div>
+    </aside>
+</div>
+
+
+<!-- Delete Confirmation -->
+<div id="delete-confirm" class="modal-overlay modal-small" hidden>
+    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-desc">
+        <h2 id="delete-confirm-title">Delete this application?</h2>
+        <p id="delete-confirm-desc">Clinic Coordinator, Howard Brown Health</p>
+        <div class="confirm-actions">
+            <button type="button" onclick="closeDeleteConfirm()">Cancel</button>
+            <button type="button" class="danger-solid" onclick="closeDeleteConfirm(); closeApplicationPanel()">Delete</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Settings Panel -->
+<div id="settings-panel" class="modal-overlay" hidden>
+    <form id="settings-form" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settings-panel-title">
+
+        <!-- Header -->
+        <div class="modal-header">
+            <h2 id="settings-panel-title">Display settings</h2>
+            <button type="button" class="icon-btn" aria-label="Close" onclick="closeSettingsPanel()">
+                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body settings-body">
+            <div>
+                <!-- Group Timeline -->
+                <fieldset class="settings-group">
+                    <legend>Group timeline by</legend>
+                    <div class="segmented">
+                        <label><input class="sr-only" type="radio" name="groupBy" value="week" checked><span>Week</span></label>
+                        <label><input class="sr-only" type="radio" name="groupBy" value="month"><span>Month</span></label>
+                        <label><input class="sr-only" type="radio" name="groupBy" value="quarter"><span>Quarter</span></label>
+                    </div>
+                </fieldset>
+
+                <!-- Show on Analytics -->
+                <fieldset class="settings-group">
+                    <legend>Show on Analytics</legend>
+                    <label class="check"><input type="checkbox" name="summary"><span>Summary numbers</span></label>
+                    <label class="check"><input type="checkbox" name="statusBreakdown"><span>Status breakdown</span></label>
+                    <label class="check"><input type="checkbox" name="whereApplied"><span>Where you applied</span></label>
+                    <label class="check"><input type="checkbox" name="perMonth"><span>Applications per month</span></label>
+                </fieldset>
+            </div>
+
+            <!-- Status Colors -->
+            <fieldset class="settings-group">
+                <legend>Status colors</legend>
+                <div id="color-rows">
+                <div class="color-row">
+                    <span class="color-row-label" id="color-label-applied">Applied</span>
+                    <div class="swatches" role="radiogroup" aria-labelledby="color-label-applied">
+                        <label class="swatch" title="Purple" style="--sw: #7665d9"><input class="sr-only" type="radio" name="color-applied" value="#7665d9" aria-label="Purple" checked><span></span></label>
+                        <label class="swatch" title="Blue" style="--sw: #3a9ee6"><input class="sr-only" type="radio" name="color-applied" value="#3a9ee6" aria-label="Blue"><span></span></label>
+                        <label class="swatch" title="Gold" style="--sw: #c7a42b"><input class="sr-only" type="radio" name="color-applied" value="#c7a42b" aria-label="Gold"><span></span></label>
+                        <label class="swatch" title="Orange" style="--sw: #d89a31"><input class="sr-only" type="radio" name="color-applied" value="#d89a31" aria-label="Orange"><span></span></label>
+                        <label class="swatch" title="Teal" style="--sw: #3d8f84"><input class="sr-only" type="radio" name="color-applied" value="#3d8f84" aria-label="Teal"><span></span></label>
+                        <label class="swatch" title="Red" style="--sw: #c45b3a"><input class="sr-only" type="radio" name="color-applied" value="#c45b3a" aria-label="Red"><span></span></label>
+                        <label class="swatch" title="Green" style="--sw: #4d9865"><input class="sr-only" type="radio" name="color-applied" value="#4d9865" aria-label="Green"><span></span></label>
+                    </div>
+                    <span class="changed" hidden>Changed</span>
+                </div>
+                <div class="color-row">
+                    <span class="color-row-label" id="color-label-review">Under Review</span>
+                    <div class="swatches" role="radiogroup" aria-labelledby="color-label-review">
+                        <label class="swatch" title="Purple" style="--sw: #7665d9"><input class="sr-only" type="radio" name="color-review" value="#7665d9" aria-label="Purple"><span></span></label>
+                        <label class="swatch" title="Blue" style="--sw: #3a9ee6"><input class="sr-only" type="radio" name="color-review" value="#3a9ee6" aria-label="Blue" checked><span></span></label>
+                        <label class="swatch" title="Gold" style="--sw: #c7a42b"><input class="sr-only" type="radio" name="color-review" value="#c7a42b" aria-label="Gold"><span></span></label>
+                        <label class="swatch" title="Orange" style="--sw: #d89a31"><input class="sr-only" type="radio" name="color-review" value="#d89a31" aria-label="Orange"><span></span></label>
+                        <label class="swatch" title="Teal" style="--sw: #3d8f84"><input class="sr-only" type="radio" name="color-review" value="#3d8f84" aria-label="Teal"><span></span></label>
+                        <label class="swatch" title="Red" style="--sw: #c45b3a"><input class="sr-only" type="radio" name="color-review" value="#c45b3a" aria-label="Red"><span></span></label>
+                        <label class="swatch" title="Green" style="--sw: #4d9865"><input class="sr-only" type="radio" name="color-review" value="#4d9865" aria-label="Green"><span></span></label>
+                    </div>
+                    <span class="changed" hidden>Changed</span>
+                </div>
+                <div class="color-row">
+                    <span class="color-row-label" id="color-label-qa">QA</span>
+                    <div class="swatches" role="radiogroup" aria-labelledby="color-label-qa">
+                        <label class="swatch" title="Purple" style="--sw: #7665d9"><input class="sr-only" type="radio" name="color-qa" value="#7665d9" aria-label="Purple"><span></span></label>
+                        <label class="swatch" title="Blue" style="--sw: #3a9ee6"><input class="sr-only" type="radio" name="color-qa" value="#3a9ee6" aria-label="Blue"><span></span></label>
+                        <label class="swatch" title="Gold" style="--sw: #c7a42b"><input class="sr-only" type="radio" name="color-qa" value="#c7a42b" aria-label="Gold" checked><span></span></label>
+                        <label class="swatch" title="Orange" style="--sw: #d89a31"><input class="sr-only" type="radio" name="color-qa" value="#d89a31" aria-label="Orange"><span></span></label>
+                        <label class="swatch" title="Teal" style="--sw: #3d8f84"><input class="sr-only" type="radio" name="color-qa" value="#3d8f84" aria-label="Teal"><span></span></label>
+                        <label class="swatch" title="Red" style="--sw: #c45b3a"><input class="sr-only" type="radio" name="color-qa" value="#c45b3a" aria-label="Red"><span></span></label>
+                        <label class="swatch" title="Green" style="--sw: #4d9865"><input class="sr-only" type="radio" name="color-qa" value="#4d9865" aria-label="Green"><span></span></label>
+                    </div>
+                    <span class="changed" hidden>Changed</span>
+                </div>
+                <div class="color-row">
+                    <span class="color-row-label" id="color-label-interview">Interview</span>
+                    <div class="swatches" role="radiogroup" aria-labelledby="color-label-interview">
+                        <label class="swatch" title="Purple" style="--sw: #7665d9"><input class="sr-only" type="radio" name="color-interview" value="#7665d9" aria-label="Purple"><span></span></label>
+                        <label class="swatch" title="Blue" style="--sw: #3a9ee6"><input class="sr-only" type="radio" name="color-interview" value="#3a9ee6" aria-label="Blue"><span></span></label>
+                        <label class="swatch" title="Gold" style="--sw: #c7a42b"><input class="sr-only" type="radio" name="color-interview" value="#c7a42b" aria-label="Gold"><span></span></label>
+                        <label class="swatch" title="Orange" style="--sw: #d89a31"><input class="sr-only" type="radio" name="color-interview" value="#d89a31" aria-label="Orange" checked><span></span></label>
+                        <label class="swatch" title="Teal" style="--sw: #3d8f84"><input class="sr-only" type="radio" name="color-interview" value="#3d8f84" aria-label="Teal"><span></span></label>
+                        <label class="swatch" title="Red" style="--sw: #c45b3a"><input class="sr-only" type="radio" name="color-interview" value="#c45b3a" aria-label="Red"><span></span></label>
+                        <label class="swatch" title="Green" style="--sw: #4d9865"><input class="sr-only" type="radio" name="color-interview" value="#4d9865" aria-label="Green"><span></span></label>
+                    </div>
+                    <span class="changed" hidden>Changed</span>
+                </div>
+                <div class="color-row">
+                    <span class="color-row-label" id="color-label-declined">Declined</span>
+                    <div class="swatches" role="radiogroup" aria-labelledby="color-label-declined">
+                        <label class="swatch" title="Purple" style="--sw: #7665d9"><input class="sr-only" type="radio" name="color-declined" value="#7665d9" aria-label="Purple"><span></span></label>
+                        <label class="swatch" title="Blue" style="--sw: #3a9ee6"><input class="sr-only" type="radio" name="color-declined" value="#3a9ee6" aria-label="Blue"><span></span></label>
+                        <label class="swatch" title="Gold" style="--sw: #c7a42b"><input class="sr-only" type="radio" name="color-declined" value="#c7a42b" aria-label="Gold"><span></span></label>
+                        <label class="swatch" title="Orange" style="--sw: #d89a31"><input class="sr-only" type="radio" name="color-declined" value="#d89a31" aria-label="Orange"><span></span></label>
+                        <label class="swatch" title="Teal" style="--sw: #3d8f84"><input class="sr-only" type="radio" name="color-declined" value="#3d8f84" aria-label="Teal"><span></span></label>
+                        <label class="swatch" title="Red" style="--sw: #c45b3a"><input class="sr-only" type="radio" name="color-declined" value="#c45b3a" aria-label="Red" checked><span></span></label>
+                        <label class="swatch" title="Green" style="--sw: #4d9865"><input class="sr-only" type="radio" name="color-declined" value="#4d9865" aria-label="Green"><span></span></label>
+                    </div>
+                    <span class="changed" hidden>Changed</span>
+                </div>
+                <div class="color-row">
+                    <span class="color-row-label" id="color-label-accepted">Accepted</span>
+                    <div class="swatches" role="radiogroup" aria-labelledby="color-label-accepted">
+                        <label class="swatch" title="Purple" style="--sw: #7665d9"><input class="sr-only" type="radio" name="color-accepted" value="#7665d9" aria-label="Purple"><span></span></label>
+                        <label class="swatch" title="Blue" style="--sw: #3a9ee6"><input class="sr-only" type="radio" name="color-accepted" value="#3a9ee6" aria-label="Blue"><span></span></label>
+                        <label class="swatch" title="Gold" style="--sw: #c7a42b"><input class="sr-only" type="radio" name="color-accepted" value="#c7a42b" aria-label="Gold"><span></span></label>
+                        <label class="swatch" title="Orange" style="--sw: #d89a31"><input class="sr-only" type="radio" name="color-accepted" value="#d89a31" aria-label="Orange"><span></span></label>
+                        <label class="swatch" title="Teal" style="--sw: #3d8f84"><input class="sr-only" type="radio" name="color-accepted" value="#3d8f84" aria-label="Teal"><span></span></label>
+                        <label class="swatch" title="Red" style="--sw: #c45b3a"><input class="sr-only" type="radio" name="color-accepted" value="#c45b3a" aria-label="Red"><span></span></label>
+                        <label class="swatch" title="Green" style="--sw: #4d9865"><input class="sr-only" type="radio" name="color-accepted" value="#4d9865" aria-label="Green" checked><span></span></label>
+                    </div>
+                    <span class="changed" hidden>Changed</span>
+                </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <button type="button" class="footer-strong">Reset to defaults</button>
+            <div class="footer-right">
+                <button type="button">Cancel</button>
+                <button type="button" class="primary-dark" onclick="saveSettings()">Save settings</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Shortcuts -->
+    <aside class="modal-shortcuts" aria-label="Shortcuts">
+        <h3>Shortcuts</h3>
+        <div class="shortcut-row"><kbd>Tab</kbd><span>Next option</span></div>
+        <div class="shortcut-row"><kbd>Space</kbd><span>Select</span></div>
+        <div class="shortcut-row"><kbd>Alt+S</kbd><span>Save</span></div>
+        <div class="shortcut-row"><kbd>Esc</kbd><span>Close</span></div>
+    </aside>
+</div>
+
+<!-- Analytics Panel -->
+<div id="analytics-panel" class="modal-overlay" hidden>
+    <div class="modal-card analytics-card" role="dialog" aria-modal="true" aria-labelledby="analytics-panel-title">
+
+        <!-- Header -->
+        <div class="modal-header">
+            <h2 id="analytics-panel-title">Analytics</h2>
+            <button type="button" class="icon-btn" aria-label="Close" onclick="closeAnalyticsPanel()">
+                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body analytics-body">
+
+            <!-- Summary Numbers -->
+            <section class="analytics-section analytics-wide" aria-labelledby="summary-title">
+                <h3 id="summary-title">Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-tile">
+                        <span class="summary-number">48</span>
+                        <span class="summary-label">Total applications</span>
+                    </div>
+                    <div class="summary-tile">
+                        <span class="summary-number">9</span>
+                        <span class="summary-label">Reached interview</span>
+                    </div>
+                    <div class="summary-tile">
+                        <span class="summary-number">1</span>
+                        <span class="summary-label">Offers</span>
+                    </div>
+                    <div class="summary-tile">
+                        <span class="summary-number">42%</span>
+                        <span class="summary-label">Response rate</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Breakdown -->
+            <section class="analytics-section analytics-wide" aria-labelledby="status-breakdown-title">
+                <h3 id="status-breakdown-title">Status breakdown</h3>
+                <div class="stacked-bar" role="img" aria-label="Applied 14, Under Review 10, QA 6, Interview 6, Declined 11, Accepted 1">
+                    <span style="flex: 14; background-color: #7665d9"></span>
+                    <span style="flex: 10; background-color: #3a9ee6"></span>
+                    <span style="flex: 6; background-color: #c7a42b"></span>
+                    <span style="flex: 6; background-color: #d89a31"></span>
+                    <span style="flex: 11; background-color: #c45b3a"></span>
+                    <span style="flex: 1; background-color: #4d9865"></span>
+                </div>
+                <div class="breakdown-legend">
+                    <div class="status-row"><span class="dot applied-dot"></span><span>Applied</span><strong>14</strong></div>
+                    <div class="status-row"><span class="dot review-dot"></span><span>Under Review</span><strong>10</strong></div>
+                    <div class="status-row"><span class="dot qa-dot"></span><span>QA</span><strong>6</strong></div>
+                    <div class="status-row"><span class="dot interview-dot"></span><span>Interview</span><strong>6</strong></div>
+                    <div class="status-row"><span class="dot declined-dot"></span><span>Declined</span><strong>11</strong></div>
+                    <div class="status-row"><span class="dot accepted-dot"></span><span>Accepted</span><strong>1</strong></div>
+                </div>
+            </section>
+
+            <!-- Where You Applied -->
+            <section class="analytics-section" aria-labelledby="where-applied-title">
+                <h3 id="where-applied-title">Where you applied</h3>
+                <div class="hbar-row">
+                    <span class="hbar-label">LinkedIn</span>
+                    <span class="hbar-track"><span class="hbar-fill" style="width: 100%"></span></span>
+                    <strong>18</strong>
+                </div>
+                <div class="hbar-row">
+                    <span class="hbar-label">Company website</span>
+                    <span class="hbar-track"><span class="hbar-fill" style="width: 83%"></span></span>
+                    <strong>15</strong>
+                </div>
+                <div class="hbar-row">
+                    <span class="hbar-label">Indeed</span>
+                    <span class="hbar-track"><span class="hbar-fill" style="width: 50%"></span></span>
+                    <strong>9</strong>
+                </div>
+                <div class="hbar-row">
+                    <span class="hbar-label">Handshake</span>
+                    <span class="hbar-track"><span class="hbar-fill" style="width: 33%"></span></span>
+                    <strong>6</strong>
+                </div>
+            </section>
+
+            <!-- Applications per Month -->
+            <section class="analytics-section" aria-labelledby="per-month-title">
+                <h3 id="per-month-title">Applications per month</h3>
+                <div class="month-chart" role="img" aria-label="July 10, August 12, September 11, October 15">
+                    <div class="month-bar"><strong>10</strong><span class="month-fill" style="height: 73px"></span><span class="month-label">Jul</span></div>
+                    <div class="month-bar"><strong>12</strong><span class="month-fill" style="height: 88px"></span><span class="month-label">Aug</span></div>
+                    <div class="month-bar"><strong>11</strong><span class="month-fill" style="height: 81px"></span><span class="month-label">Sep</span></div>
+                    <div class="month-bar"><strong>15</strong><span class="month-fill" style="height: 110px"></span><span class="month-label">Oct</span></div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <div class="footer-right">
+                <button type="button" class="primary-dark" onclick="closeAnalyticsPanel()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortcuts -->
+    <aside class="modal-shortcuts" aria-label="Shortcuts">
+        <h3>Shortcuts</h3>
+        <div class="shortcut-row"><kbd>Tab</kbd><span>Next section</span></div>
+        <div class="shortcut-row"><kbd>Esc</kbd><span>Close</span></div>
+    </aside>
+</div>
+
 </body>
 </html>
+
+
