@@ -100,60 +100,19 @@ function refreshYourSearchSummary() {
 
 // --- BUTTON FUNCTIONALITY --- 
 
-window.setStatusFilter = function(status) {
-    // TODO: Implement behavior for changing the visually active status filter, changing the currentlyDisplayedApplications, and refreshing the home page from the currently displayed applications.
-
-    refreshHomePageFromCurrentlyDisplayedApplications();
-}
-
-window.openAnalyticsPanel = function() {
-    console.log("Opening analytics panel.");
-    // TODO: Make the analytics panel visible, (optionally) play the opening animation, and defocus the home page.
-}
-
-window.closeAnalyticsPanel = function() {
-    console.log("Closing the analytics panel.");
-    // TODO: Hide the analytics panel, (optionally) play the closing animation, and refocus the home page.
-}
-
-window.openSettingsPanel = function() {
-    console.log("Opening settings panel.");
-    // TODO: Make the settings panel visible, (optionally) play the opening animation, and defocus the home page.
-}
-
-window.closeSettingsPanel = function() {
-    console.log("Closing the settings panel.");
-    // TODO: Hide the settings panel, (optionally) play the closing animation, and refocus the home page.
-}
-
-window.openApplicationPanel = function() {
-    console.log("Opening the application panel.");
-    // TODO: Make the application panel visible, (optionally) play tthe opening animation, and defocus the home page.
-}
-
-window.closeApplicationPanel = function() {
-    console.log("Closing the application panel.");
-    // TODO: Hide the application panel, (optionally) play the closing animation, and refocus the home page.
-}
-
 /**
- * NOT CURRENTLY IN USE.
+ * Creates a new application object and pushes it to the applications array.
  */
-window.createNewApplication = function() {
-    console.log("Creating a new application.");
-    var testApplication = new Application(
-        "Night Guard",
-        "Freddy Fazbear's Pizza",
-        "Chicago, IL",
-        "https://freddys.com",
-        "261105",
-        "Indeed",
-        1);
-    applications.push(testApplication);
-}
-
-window.saveCurrentApplication = function(positionTitle = "", company = "", location = "", applicationLink = "", dateApplied = new Date(), appliedVia = "", status = 0) {
-    applications.push(new Application());
+window.saveCurrentApplication = function() {
+    applications.push(new Application(
+        document.getElementsByName("positionTitle")[0].value,
+        document.getElementsByName("company")[0].value,
+        document.getElementsByName("location")[0].value,
+        document.getElementsByName("applicationLink")[0].value,
+        new Date(document.getElementsByName("dateApplied")[0].value),
+        document.getElementsByName("appliedVia")[0].value,
+        document.getElementsByName("status")[0].value,
+    ));
 }
 
 window.saveApplications = function() {
@@ -169,6 +128,56 @@ window.clearAllApplicationsEverywhere = function() {
     clearApplicationsInLocalStorage();
     applications = [];
     currentlyDisplayedApplications = [];
+}
+
+window.saveSettings = function() {
+    console.log("Saving settings.");    
+}
+
+window.openSettingsPanel = function() {
+    console.log("Opening settings panel.");
+    removeApplicationKeyboardEventListeners();
+    addSettingsKeyboardEventListeners();
+    document.getElementById("settings-panel").hidden = false;
+}
+
+window.closeSettingsPanel = function() {
+    console.log("Closing the settings panel.");
+    removeSettingsKeyboardEventListeners();
+    addHomeKeyboardEventListeners();
+    document.getElementById("settings-panel").hidden = true;
+}
+
+window.openApplicationPanel = function() {
+    console.log("Opening the application panel.");
+    removeHomeKeyboardEventListeners();
+    addApplicationKeyboardEventListeners();
+    document.getElementById("application-panel").hidden = false;
+}
+
+window.closeApplicationPanel = function() {
+    console.log("Closing the application panel.");
+    removeApplicationKeyboardEventListeners();
+    addHomeKeyboardEventListeners();
+    document.getElementById("application-panel").hidden = true;
+}
+
+window.openAnalyticsPanel = function() {
+    console.log("Opening analytics panel.");
+    document.getElementById("analytics-panel").hidden = false;
+}
+
+window.closeAnalyticsPanel = function() {
+    console.log("Closing the analytics panel.");
+    document.getElementById("analytics-panel").hidden = true;
+}
+
+window.openDeleteConfirm = function() {
+    document.getElementById("delete-confirm").hidden = false;
+}
+
+window.closeDeleteConfirm = function() {
+    document.getElementById("delete-confirm").hidden = true;
 }
 
 
@@ -386,6 +395,143 @@ function displayApplicationsOnCalendar() {
         monthSection.appendChild(jobCard);
     });
 }
+
+
+// --- EVENT HANDLING ---
+
+function homeKeyboardEventListeners(e) {
+    if (e.key == "q" && e.altKey) {
+        console.log("Keyboard shortcut: Creating new application.");
+        window.openApplicationPanel();
+        createNewApplication();
+        displayApplicationsInConsole();
+        refreshYourSearchSummary();
+    }
+    if (e.key == "s" && e.altKey) {
+        console.log("Keyboard shortcut: Sorting applications by status.");
+        sortApplicationsByStatus(applications);
+    }
+    if (e.key == "a" && e.altKey) {
+        console.log("Keyboard shortcut: Opening analytics panel.");
+        window.openAnalyticsPanel();
+    }
+    if (e.key == "w" && e.altKey) {
+        console.log("Keyboard shortcut: Opening settings panel.");
+        window.openAnalyticsPanel();
+    }
+    if (e.key == "Tab") {
+        console.log("Keyboard shortcut: Advance field.");
+        // TODO: Implement function with defined behavior for field advancing. 
+    }
+    // if (e.key == "O") {
+    //     console.log("Debug keyboard shortcut: clearing localStorage.");
+    //     clearApplications();
+    // }
+}
+
+/**
+ * Adds event listeners for the keyboard shortcuts supported by Shade's home menu.
+ */
+function addHomeKeyboardEventListeners() {
+    window.addEventListener("keydown", homeKeyboardEventListeners);
+}
+
+/**
+ * Removes event listeners for the keyboard shortcuts supported by Shade's home menu. Called when a panel is opened.
+ */
+function removeHomeKeyboardEventListeners() {
+    window.removeEventListener("keydown", homeKeyboardEventListeners);
+}
+
+
+function applicationKeyboardEventListeners(e) {
+    if (e.key == "Tab") {
+        console.log("Keyboard shortcut: Advance field.");
+    }
+    if (e.key == "ArrowRight") {
+        console.log("Keyboard shortcut: Advance status.");
+    }
+    if (e.key == "ArrowLeft") {
+        console.log("keyboard shortcut: Regress status.");
+    }
+    if (e.key == "s" && e.altKey) {
+        console.log("Keyboard shortcut: Save application");
+        saveCurrentApplication();
+    }
+    if (e.key == "d" && e.altKey) {
+        console.log("Keyboard shortcut: Delete application");
+        openDeleteConfirm();
+    }
+    if (e.key == "Escape") {
+        console.log("Keyboard shortcut: Close application panel.");
+        closeApplicationPanel();
+    }
+}
+
+/**
+ * Adds event listeners for the keyboard shortcuts supported by Shade's application panel.
+ */
+function addApplicationKeyboardEventListeners() {
+    window.addEventListener("keydown", applicationKeyboardEventListeners);
+}
+
+/**
+ * Removes event listeners for the keyboard shortucts supported by Shade's application panel. Called when the panel is closed.
+ */
+function removeApplicationKeyboardEventListeners() {
+    window.removeEventListener("keydown", applicationKeyboardEventListeners);
+}
+
+
+function settingsKeyboardEventListeners(e) {
+    if (e.key == "Tab") {
+        console.log("Keyboard shortcut: Advance field.");
+    }
+    if (e.key == " ") {
+        console.log("Keyboard shortcut: Select.");
+    }
+    if (e.key == "s" && e.altKey) {
+        console.log("Keyboardd shortcut: Save settings.");
+    }
+    if (e.key == "Escape") {
+        console.log("Keyboard shortcut: Close settings panel.");
+        closeSettingsPanel();
+    }
+}
+
+/**
+ * Adds event listeners for the keyboard shortcuts supported by Shade's settings panel.
+ */
+function addSettingsKeyboardEventListeners() {
+    window.addEventListener("keydown", settingsKeyboardEventListeners);
+}
+
+/**
+ * Removes event listeners for the keyboard shortcuts supported by Shade's settings panel. Called when the panel is closed.
+ */
+function removeSettingsKeyboardEventListeners() {
+    window.removeEventListener("keydown", settingsKeyboardEventListeners);
+}
+
+
+function analyticsKeyboardEventListeners(e) {
+    // TODO: Port the keybindings on the analytics panel to this function.
+}
+
+/**
+ * Adds event listeners for the keyboard shortcuts supported by Shade's analytics panel.
+ */
+function addAnalyticsKeyboardEventListeners() {
+    window.addEventListener("keydown", analyticsKeyboardEventListeners);
+}
+
+/**
+ * Removes event listeners for the keyboard shortcuts supported by Shade's analytics panel. Called when the panel is closed.
+ */
+function removeAnalyticsKeyboardEventListeners() {
+    window.removeEventListener("keydown", analyticsKeyboardEventListeners);
+}
+
 
 // --- INITIALIZATION ---
 
