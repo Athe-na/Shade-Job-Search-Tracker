@@ -253,7 +253,7 @@ function addKeyboardEventListeners() {
         }
         if (e.key == "w" && e.altKey) {
             console.log("Keyboard shortcut: Opening settings panel.");
-            window.openAnalyticsPanel();
+            window.openSettingsPanel();
         }
         if (e.key == "Tab") {
             console.log("Keyboard shortcut: Advance field.");
@@ -422,7 +422,7 @@ function homeKeyboardEventListeners(e) {
     }
     if (e.key == "w" && e.altKey) {
         console.log("Keyboard shortcut: Opening settings panel.");
-        window.openAnalyticsPanel();
+        window.openSettingsPanel();
     }
     if (e.key == "Tab") {
         console.log("Keyboard shortcut: Advance field.");
