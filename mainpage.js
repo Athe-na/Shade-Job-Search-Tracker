@@ -338,7 +338,7 @@ function createTestData() {
 function displayApplicationsOnCalendar() {
 
     // Find the calendar on the webpage.
-    var calendar = document.querySelector("#calendar");
+    var calendar = document.getElementsByClassName("calendar")[0];
 
     console.log("Calendar element:", calendar);
 
