@@ -104,6 +104,7 @@ function refreshYourSearchSummary() {
  * Creates a new application object and pushes it to the applications array.
  */
 window.saveCurrentApplication = function() {
+    console.log("Saving current application.");
     applications.push(new Application(
         document.getElementsByName("positionTitle")[0].value,
         document.getElementsByName("company")[0].value,
@@ -113,6 +114,10 @@ window.saveCurrentApplication = function() {
         document.getElementsByName("appliedVia")[0].value,
         document.getElementsByName("status")[0].value,
     ));
+    displayApplicationsOnCalendar();
+    closeApplicationPanel();
+    refreshYourSearchSummary();
+    saveApplicationsToLocalStorage();
 }
 
 window.saveApplications = function() {
