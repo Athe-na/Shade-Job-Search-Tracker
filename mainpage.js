@@ -101,23 +101,85 @@ function refreshYourSearchSummary() {
 // --- BUTTON FUNCTIONALITY --- 
 
 /**
- * Creates a new application object and pushes it to the applications array.
+ * Index (in the applications array) of the application currently open in the panel.
+ * null means the panel is creating a new application.
  */
-window.saveCurrentApplication = function() {
-    console.log("Saving current application.");
-    applications.push(new Application(
+var editingApplicationIndex = null;
+
+/**
+ * Reads the application panel's fields into a new Application object.
+ */
+function readApplicationForm() {
+    var checkedStatus = document.querySelector('#application-form input[name="status"]:checked');
+    return new Application(
         document.getElementsByName("positionTitle")[0].value,
         document.getElementsByName("company")[0].value,
         document.getElementsByName("location")[0].value,
         document.getElementsByName("applicationLink")[0].value,
         new Date(document.getElementsByName("dateApplied")[0].value),
         document.getElementsByName("appliedVia")[0].value,
-        document.getElementsByName("status")[0].value,
-    ));
+        checkedStatus ? parseInt(checkedStatus.value) : 0,
+    );
+}
+
+/**
+ * Fills the application panel's fields with the details of an application.
+ * @param {Application} application
+ */
+function fillApplicationForm(application) {
+    document.getElementsByName("positionTitle")[0].value = application.positionTitle || "";
+    document.getElementsByName("company")[0].value = application.company || "";
+    document.getElementsByName("location")[0].value = application.location || "";
+    document.getElementsByName("applicationLink")[0].value = application.applicationLink || "";
+    document.getElementsByName("dateApplied")[0].value = isNaN(application.dateApplied) ? "" : application.dateApplied.toISOString().slice(0, 10);
+    document.getElementsByName("appliedVia")[0].value = application.appliedVia || "";
+
+    var statusRadio = document.querySelector('#application-form input[name="status"][value="' + application.status + '"]');
+    if (statusRadio) {
+        statusRadio.checked = true;
+    }
+}
+
+/**
+ * Saves the application panel. Updates the open application if one was clicked,
+ * otherwise creates a new application and pushes it to the applications array.
+ */
+window.saveCurrentApplication = function() {
+    console.log("Saving current application.");
+    var application = readApplicationForm();
+    if (editingApplicationIndex === null) {
+        applications.push(application);
+    } else {
+        applications[editingApplicationIndex] = application;
+    }
     displayApplicationsOnCalendar();
     closeApplicationPanel();
     refreshYourSearchSummary();
     saveApplicationsToLocalStorage();
+}
+
+/**
+ * Opens the application panel showing the details of an existing application.
+ * @param {int} index - Index of the application in the applications array.
+ */
+window.openApplicationDetails = function(index) {
+    var application = applications[index];
+    console.log("Opening details for application:", application);
+    openApplicationPanel(index);
+}
+
+/**
+ * Deletes the application currently open in the panel.
+ */
+window.deleteCurrentApplication = function() {
+    if (editingApplicationIndex !== null) {
+        applications.splice(editingApplicationIndex, 1);
+        displayApplicationsOnCalendar();
+        refreshYourSearchSummary();
+        saveApplicationsToLocalStorage();
+    }
+    closeDeleteConfirm();
+    closeApplicationPanel();
 }
 
 window.saveApplications = function() {
@@ -141,7 +203,7 @@ window.saveSettings = function() {
 
 window.openSettingsPanel = function() {
     console.log("Opening settings panel.");
-    removeApplicationKeyboardEventListeners();
+    removeHomeKeyboardEventListeners();
     addSettingsKeyboardEventListeners();
     document.getElementById("settings-panel").hidden = false;
 }
@@ -153,8 +215,29 @@ window.closeSettingsPanel = function() {
     document.getElementById("settings-panel").hidden = true;
 }
 
-window.openApplicationPanel = function() {
+/**
+ * Opens the application panel.
+ * @param {int} [index] - Index of an existing application to show. Leave out to create a new application.
+ */
+window.openApplicationPanel = function(index) {
     console.log("Opening the application panel.");
+    var form = document.getElementById("application-form");
+    var title = document.getElementById("application-panel-title");
+    var deleteButton = document.getElementById("delete-btn");
+
+    if (typeof index === "number" && applications[index]) {
+        editingApplicationIndex = index;
+        fillApplicationForm(applications[index]);
+        title.textContent = "Edit application";
+        deleteButton.hidden = false;
+    } else {
+        editingApplicationIndex = null;
+        form.reset();
+        document.getElementsByName("dateApplied")[0].value = new Date().toISOString().slice(0, 10);
+        title.textContent = "New application";
+        deleteButton.hidden = true;
+    }
+
     removeHomeKeyboardEventListeners();
     addApplicationKeyboardEventListeners();
     document.getElementById("application-panel").hidden = false;
@@ -178,6 +261,11 @@ window.closeAnalyticsPanel = function() {
 }
 
 window.openDeleteConfirm = function() {
+    if (editingApplicationIndex === null) {
+        return;
+    }
+    var application = applications[editingApplicationIndex];
+    document.getElementById("delete-confirm-desc").textContent = application.positionTitle + ", " + application.company;
     document.getElementById("delete-confirm").hidden = false;
 }
 
@@ -229,42 +317,6 @@ function clearApplicationsInLocalStorage() {
 }
 
 // --- EVENT HANDLING ---
-
-/**
- * Adds event listeners for the keyboard shortcuts supported by Shade.
- */
-function addKeyboardEventListeners() {
-    window.addEventListener("keydown", function (e)
-    {
-        if (e.key == "q" && e.altKey) {
-            console.log("Keyboard shortcut: Creating new application.");
-            window.openApplicationPanel();
-            createNewApplication();
-            displayApplicationsInConsole();
-            refreshYourSearchSummary();
-        }
-        if (e.key == "s" && e.altKey) {
-            console.log("Keyboard shortcut: Sorting applications by status.");
-            sortApplicationsByStatus(applications);
-        }
-        if (e.key == "a" && e.altKey) {
-            console.log("Keyboard shortcut: Opening analytics panel.");
-            window.openAnalyticsPanel();
-        }
-        if (e.key == "w" && e.altKey) {
-            console.log("Keyboard shortcut: Opening settings panel.");
-            window.openSettingsPanel();
-        }
-        if (e.key == "Tab") {
-            console.log("Keyboard shortcut: Advance field.");
-            // TODO: Implement function with defined behavior for field advancing. 
-        }
-        // if (e.key == "O") {
-        //     console.log("Debug keyboard shortcut: clearing localStorage.");
-        //     clearApplications();
-        // }
-    });
-}
 
 function createTestData() {
     applications = [
@@ -367,7 +419,7 @@ function displayApplicationsOnCalendar() {
     });
 
     // Add each application to its corresponding month.
-    applications.forEach((application) => {
+    applications.forEach((application, index) => {
 
         var monthIndex = application.dateApplied.getMonth();
 
@@ -392,10 +444,23 @@ function displayApplicationsOnCalendar() {
 
         jobCard.classList.add("job", statusClasses[application.status]);
 
-        jobCard.innerHTML = `
-            <h4>${application.positionTitle}</h4>
-            <p>${application.company}</p>
-        `;
+        var titleElement = document.createElement("h4");
+        titleElement.textContent = application.positionTitle;
+        var companyElement = document.createElement("p");
+        companyElement.textContent = application.company;
+        jobCard.append(titleElement, companyElement);
+
+        // Clicking (or pressing Enter/Space on) a card opens that application's details.
+        jobCard.tabIndex = 0;
+        jobCard.setAttribute("role", "button");
+        jobCard.setAttribute("aria-label", "View " + application.positionTitle + " at " + application.company);
+        jobCard.addEventListener("click", () => openApplicationDetails(index));
+        jobCard.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openApplicationDetails(index);
+            }
+        });
 
         monthSection.appendChild(jobCard);
     });
@@ -408,7 +473,6 @@ function homeKeyboardEventListeners(e) {
     if (e.key == "q" && e.altKey) {
         console.log("Keyboard shortcut: Creating new application.");
         window.openApplicationPanel();
-        createNewApplication();
         displayApplicationsInConsole();
         refreshYourSearchSummary();
     }
@@ -557,7 +621,7 @@ function initialize() {
 
     displayApplicationsOnCalendar();
     displayApplicationsInConsole();
-    addKeyboardEventListeners();
+    addHomeKeyboardEventListeners();
     refreshYourSearchSummary();
     // Folake this would be a good place to create some test data.
 }
