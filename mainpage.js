@@ -55,8 +55,8 @@ var colorScheme = [
     "status-blue",
     "status-yellow",
     "status-orange",
-    "status-red",
-    "status-green"
+    "status-green",
+    "status-red"
 ];
 
 /**
@@ -621,6 +621,18 @@ function removeAnalyticsKeyboardEventListeners() {
     window.removeEventListener("keydown", analyticsKeyboardEventListeners);
 }
 
+/**
+ * DEBUG: Adds a keybind to reset localstorage
+ */
+function addDebugResetKey() {
+    window.addEventListener("keydown", (e) => {
+        if (e.key == "9" && e.ctrlKey) {
+            console.log("DEBUG Shortcut: Resetting localstorage");
+            clearApplicationsInLocalStorage();
+        }
+    });
+}
+
 
 // --- INITIALIZATION ---
 
@@ -642,6 +654,7 @@ function initialize() {
     displayApplicationsOnCalendar();
     displayApplicationsInConsole();
     addHomeKeyboardEventListeners();
+    addDebugResetKey();
     refreshYourSearchSummary();
     // Folake this would be a good place to create some test data.
 }
