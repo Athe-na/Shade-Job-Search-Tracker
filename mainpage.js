@@ -211,9 +211,14 @@ window.clearAllApplicationsEverywhere = function() {
 
 window.saveSettings = function() {
     console.log("Saving settings.");
-    settings = [
-
-    ];
+    colorScheme[0] = document.querySelector('input[name="color-applied"]:checked').value;
+    colorScheme[1] = document.querySelector('input[name="color-review"]:checked').value;
+    colorScheme[2] = document.querySelector('input[name="color-qa"]:checked').value;
+    colorScheme[3] = document.querySelector('input[name="color-interview"]:checked').value;
+    colorScheme[4] = document.querySelector('input[name="color-declined"]:checked').value;
+    colorScheme[5] = document.querySelector('input[name="color-accepted"]:checked').value;
+    console.log("colorScheme: " + colorScheme);
+    closeSettingsPanel();
 }
 
 window.openSettingsPanel = function() {
@@ -227,6 +232,7 @@ window.closeSettingsPanel = function() {
     console.log("Closing the settings panel.");
     removeSettingsKeyboardEventListeners();
     addHomeKeyboardEventListeners();
+    displayApplicationsOnCalendar();
     document.getElementById("settings-panel").hidden = true;
 }
 
@@ -276,6 +282,7 @@ window.closeApplicationPanel = function() {
     console.log("Closing the application panel.");
     removeApplicationKeyboardEventListeners();
     addHomeKeyboardEventListeners();
+    displayApplicationsOnCalendar();
     document.getElementById("application-panel").hidden = true;
 }
 
