@@ -81,6 +81,10 @@ function filterApplicationsByStatus(inputApplications, status, bAfter) {
     return inputApplications.filter((application) => bAfter ? application.status >= status : application.status <= status);
 }
 
+function filterApplicationsByStatusMatch(inputApplications, status) {
+    return inputApplications.filter((application) => application.status == status);
+}
+
 /**
  * @param {Array[Application]} inputApplications - The applications to sort.
  * @param {boolean} bAscending - Whether to sort ascending or descending. True: Ascending, False: Descending.
@@ -115,14 +119,28 @@ function refreshYourSearchSummary() {
 function updateAnalyticsPage() {
     // call all the component analytics update functions
     updateSummary();
+    updateStatusBreakdown();
 }
 
 function updateSummary() {
-    summaries = getElementsByClassName("summary-number");
-    summary[0].innerHTML = applications.length; // Set the total number of applications.
-    summary[1].innerHTML = filterApplicationsByStatus(applications, 3, true); // Applications that reached interview.
-    summary[2].innerHTML = filterApplicationsByStatus(applications, 5, true); // Applications that were accepted.
-    summary[3].innerHTML = filterApplicationsByStatus(applications, 2, true).length / applications.length; // Response rate.
+    var summaries = document.getElementsByClassName("summary-number");
+    summaries[0].innerHTML = applications.length; // Set the total number of applications.
+    summaries[1].innerHTML = filterApplicationsByStatus(applications, 3, true).length; // Applications that reached interview.
+    summaries[2].innerHTML = filterApplicationsByStatus(applications, 5, true).length; // Applications that were accepted.
+    summaries[3].innerHTML = Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) + "%"; // Response rate.
+}
+
+function updateStatusBreakdown() {
+    var stackedBar = document.getElementsByClassName("stacked-bar")[0].children;
+
+    var appliedCount = filterApplicationsByStatusMatch(applications, 0).length;
+    var reviewedCount = filterApplicationsByStatusMatch(applications, 1).length;
+    var qaCount = filterApplicationsByStatusMatch(applications, 2).length;
+    var interviewCount = filterApplicationsByStatusMatch(applications, 3).length;
+    var declinedCount = filterApplicationsByStatusMatch(applications, 4).length;
+    var acceptedCount = filterApplicationsByStatusMatch(applications, 5).length;
+
+    stackedBar[0].style = toString("flex: " + appliedCount + "; backgroundColor: #7665d9");
 }
 
 
@@ -304,6 +322,7 @@ window.closeApplicationPanel = function() {
 
 window.openAnalyticsPanel = function() {
     console.log("Opening analytics panel.");
+    updateAnalyticsPage();
     document.getElementById("analytics-panel").hidden = false;
 }
 
