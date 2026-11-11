@@ -110,6 +110,22 @@ function refreshYourSearchSummary() {
 }
 
 
+// --- ANALYTICS FUNCTIONALITY ---
+
+function updateAnalyticsPage() {
+    // call all the component analytics update functions
+    updateSummary();
+}
+
+function updateSummary() {
+    summaries = getElementsByClassName("summary-number");
+    summary[0].innerHTML = applications.length; // Set the total number of applications.
+    summary[1].innerHTML = filterApplicationsByStatus(applications, 3, true); // Applications that reached interview.
+    summary[2].innerHTML = filterApplicationsByStatus(applications, 5, true); // Applications that were accepted.
+    summary[3].innerHTML = filterApplicationsByStatus(applications, 2, true).length / applications.length; // Response rate.
+}
+
+
 // --- BUTTON FUNCTIONALITY --- 
 
 /**
@@ -523,9 +539,6 @@ function displayApplicationsOnCalendar() {
         monthSection.appendChild(jobCard);
     });
 }
-
-
-// --- EVENT HANDLING ---
 
 function homeKeyboardEventListeners(e) {
     if (e.key == "q" && e.altKey) {
