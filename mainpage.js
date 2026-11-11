@@ -1,4 +1,4 @@
-// Authored by Athena Osborne, Folake Oluewu, Elda Shatro, [add your name here if you work on this]
+// Authored by Athena O, Folake Oluewu, Elda Shatro, [add your name here if you work on this]
 
 class Application {
 
@@ -217,7 +217,7 @@ window.saveSettings = function() {
     colorScheme[3] = document.querySelector('input[name="color-interview"]:checked').value;
     colorScheme[4] = document.querySelector('input[name="color-declined"]:checked').value;
     colorScheme[5] = document.querySelector('input[name="color-accepted"]:checked').value;
-    console.log("colorScheme: " + colorScheme);
+    saveColorSchemeToLocalStorage();
     closeSettingsPanel();
 }
 
@@ -327,7 +327,7 @@ function getDataFromLocalStorage() {
             application.dateApplied = new Date(application.dateApplied);
         });
 
-        console.log("Retrieved data from localStorage and passed it into the applications array.")
+        console.log("Retrieved data from localStorage and passed it into the applications array.");
         return;
     }
     // If not, print a message to the console.
@@ -340,17 +340,48 @@ function getDataFromLocalStorage() {
  */
 function saveApplicationsToLocalStorage() {
     // Clear localstorage to make room for new object.
-    localStorage.clear();
+    localStorage.removeItem("applications");
     // Stringify the applications array and place it into storage.
     localStorage.setItem("applications", JSON.stringify(applications));
     console.log("Saved applications to localStorage.");
-    return true;
+    return;
 }
 
 function clearApplicationsInLocalStorage() {
     localStorage.clear();
     console.log("Cleared localStorage successfully.");
 }
+
+/**
+ * Attempts to retrieve the stored colorScheme if it exists.
+ */
+function getColorSchemeFromLocalStorage() {
+    // Check if there is data for "colorScheme" in localStorage
+    var locallyStoredColorSchemeJSON = localStorage.getItem("colorScheme");
+    if (locallyStoredColorSchemeJSON) {
+        // If so, pass it into the applications array.
+        colorScheme = JSON.parse(locallyStoredColorSchemeJSON);
+
+        console.log("Retrieved color scheme data from localStorage and passed it into the applications array.");
+        return;
+    }
+    // If not, print a message to the console.
+    console.log("No item to retreive under \"colorScheme\".");
+}
+
+/**
+ * Stringifies the colorScheme array as a JSON object and places it into localStorage, overriding the previous value.
+ * Call this every time a change to the color scheme is saved.
+ */
+function saveColorSchemeToLocalStorage() {
+    // Clear localstorage to make room for new object.
+    localStorage.removeItem("colorScheme");
+    // Stringify the applications array and place it into storage.
+    localStorage.setItem("colorScheme", JSON.stringify(colorScheme));
+    console.log("Saved colorScheme to localStorage.");
+    return;
+}
+
 
 // --- EVENT HANDLING ---
 
@@ -648,6 +679,7 @@ function initialize() {
 
     // Perform startup taks.
     getDataFromLocalStorage();
+    getColorSchemeFromLocalStorage();
 
     // Only create test data if no applications exist.
     if (applications.length === 0) {
