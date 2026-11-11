@@ -259,34 +259,39 @@ button:focus-visible {
 }
 
 /* Job Status Colors */
-.applied {
+.status-purple {
     background-color: #7665d95f;
     border-color: #7665d9;
 }
 
-.review {
+.status-blue {
     background-color: #3a9ee651;
     border-color: #3a9ee6;
 }
 
-.qa {
+.status-yellow {
     background-color: #e1bb3064;
     border-color: #C7A42B;
 }
 
-.interview {
+.status-orange {
     background-color: #e79f236f;
     border-color: #D89A31;
 }
 
-.declined {
+.status-res {
     background-color: #e551244d;
     border-color: #C45B3A;
 }
 
-.accepted {
+.status-green {
     background-color: #4d986561;
     border-color: #4D9865;
+}
+
+.status-teal {
+    background-color: #3d8f84;
+    border-color: #6b8885;
 }
 
 /* Smaller Screens */

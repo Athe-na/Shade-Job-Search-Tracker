@@ -48,6 +48,18 @@ var applications = [];
 var currentlyDisplayedApplications = [];
 
 /**
+ * The array of values representing user preferred color scheme.
+ */
+var colorScheme = [
+    "status-purple",
+    "status-blue",
+    "status-yellow",
+    "status-orange",
+    "status-red",
+    "status-green"
+];
+
+/**
  * Filtering function for the applications array by date.
  * @param {Array[Application]} inputApplications - The applications to filter.
  * @param {Date} date - The date to use as the cutoff. Inclusive.
@@ -198,7 +210,10 @@ window.clearAllApplicationsEverywhere = function() {
 }
 
 window.saveSettings = function() {
-    console.log("Saving settings.");    
+    console.log("Saving settings.");
+    settings = [
+
+    ];
 }
 
 window.openSettingsPanel = function() {
@@ -213,6 +228,20 @@ window.closeSettingsPanel = function() {
     removeSettingsKeyboardEventListeners();
     addHomeKeyboardEventListeners();
     document.getElementById("settings-panel").hidden = true;
+}
+
+window.changeColorScheme = function(itemIndex, colorIndex) {
+    var colorClass = [
+        "status-purple",
+        "status-blue",
+        "status-yellow",
+        "status-orange",
+        "status-red",
+        "status-green",
+        "status-teal"
+    ];
+
+    colorScheme[itemIndex] = colorClass[colorIndex];
 }
 
 /**
@@ -432,17 +461,8 @@ function displayApplicationsOnCalendar() {
 
         var jobCard = document.createElement("div");
 
-        // Match the application status to its CSS class.
-        var statusClasses = [
-            "applied",
-            "review",
-            "qa",
-            "interview",
-            "accepted",
-            "declined"
-        ];
-
-        jobCard.classList.add("job", statusClasses[application.status]);
+        // Match the application status to its CSS class. Uses the colorScheme array.
+        jobCard.classList.add("job", colorScheme[application.status]);
 
         var titleElement = document.createElement("h4");
         titleElement.textContent = application.positionTitle;
