@@ -90,6 +90,69 @@ function filterApplicationsByStatusMatch(inputApplications, status) {
  * @param {boolean} bAscending - Whether to sort ascending or descending. True: Ascending, False: Descending.
  * @returns The applications array, sorted by status.
  */
+/**
+ * The current text in the search bar.
+ */
+var searchQuery = "";
+
+/**
+ * Returns true if the application matches every word in the search query.
+ * Searches title, company, location, and where it was applied.
+ * @param {Application} application
+ * @param {string} query
+ */
+function applicationMatchesSearch(application, query) {
+    var words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length === 0) {
+        return true;
+    }
+    var haystack = [
+        application.positionTitle,
+        application.company,
+        application.location,
+        application.appliedVia
+    ].join(" ").toLowerCase();
+    return words.every((word) => haystack.includes(word));
+}
+
+/**
+ * Hooks up the search bar so the calendar updates as the user types.
+ */
+function setUpSearchBar() {
+    var searchBox = document.getElementById("search-box");
+    var searchInput = document.getElementById("search-input");
+    var clearButton = document.getElementById("search-clear");
+
+    function runSearch() {
+        searchQuery = searchInput.value;
+        searchBox.classList.toggle("has-query", searchQuery.length > 0);
+        displayApplicationsOnCalendar();
+    }
+
+    function clearSearch() {
+        searchInput.value = "";
+        runSearch();
+    }
+
+    searchInput.addEventListener("input", runSearch);
+
+    // Clicking anywhere on the pill focuses the input.
+    searchBox.addEventListener("click", () => searchInput.focus());
+
+    clearButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        clearSearch();
+        searchInput.focus();
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            clearSearch();
+            searchInput.blur();
+        }
+    });
+}
+
 function sortApplicationsByStatus(inputApplications, bAscending) {
     return inputApplications.toSorted((a, b) => bAscending ? a.status - b.status : b.status - a.status);
 }
@@ -520,6 +583,8 @@ function displayApplicationsOnCalendar() {
         calendar.appendChild(monthSection);
     });
 
+    var matchCount = 0;
+
     // Add each application to its corresponding month.
     applications.forEach((application, index) => {
 
@@ -529,6 +594,12 @@ function displayApplicationsOnCalendar() {
         if (monthIndex < 6 || monthIndex > 9) {
             return;
         }
+
+        // Skip applications that don't match the search bar.
+        if (!applicationMatchesSearch(application, searchQuery)) {
+            return;
+        }
+        matchCount++;
 
         var monthSection = calendar.children[monthIndex - 6];
 
@@ -557,9 +628,36 @@ function displayApplicationsOnCalendar() {
 
         monthSection.appendChild(jobCard);
     });
+
+    // Show how many results the search found.
+    var searchCount = document.getElementById("search-count");
+    if (searchCount) {
+        searchCount.textContent = searchQuery.trim()
+            ? (matchCount === 0 ? "No results" : matchCount + (matchCount === 1 ? " result" : " results"))
+            : "";
+        searchCount.classList.toggle("no-results", searchQuery.trim() !== "" && matchCount === 0);
+    }
+
+    // Tell the user when a month has no matches.
+    if (searchQuery.trim()) {
+        Array.from(calendar.children).forEach((monthSection) => {
+            if (monthSection.children.length === 1) {
+                var empty = document.createElement("p");
+                empty.classList.add("search-empty");
+                empty.textContent = "No matches";
+                monthSection.appendChild(empty);
+            }
+        });
+    }
 }
 
 function homeKeyboardEventListeners(e) {
+    // "/" focuses the search bar (unless the user is already typing somewhere).
+    if (e.key == "/" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        document.getElementById("search-input").focus();
+        return;
+    }
     if (e.key == "q" && e.altKey) {
         console.log("Keyboard shortcut: Creating new application.");
         window.openApplicationPanel();
@@ -722,6 +820,7 @@ function initialize() {
     // Set the applications that should currently be displayed.
     currentlyDisplayedApplications = applications;
 
+    setUpSearchBar();
     displayApplicationsOnCalendar();
     displayApplicationsInConsole();
     addHomeKeyboardEventListeners();

@@ -204,6 +204,164 @@ button:focus-visible {
     border-color: #3922A7;
 }
 
+/* Search */
+/* Pill-shaped container holding icon, input, count, hint and clear button */
+.search-box {
+    margin-left: auto;
+    flex: 0 1 280px;
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 6px 0 14px;
+    background-color: white;
+    border: 1px solid #D8DBE0;
+    border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(28, 31, 43, 0.06);
+    cursor: text;
+    transition: flex-basis 0.25s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-box:hover {
+    border-color: #b9b2e6;
+}
+
+/* Grows and glows while the user is typing */
+.search-box:focus-within {
+    flex-basis: 360px;
+    border-color: #3922A7;
+    box-shadow: 0 0 0 4px rgba(57, 34, 167, 0.15);
+}
+
+.search-icon {
+    flex-shrink: 0;
+    color: #8a8e99;
+    transition: color 0.15s ease;
+}
+
+.search-box:focus-within .search-icon,
+.search-box.has-query .search-icon {
+    color: #3922A7;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    color: #1C1F2B;
+}
+
+.search-input::placeholder {
+    color: #9a9da7;
+}
+
+/* Hide the browser's built-in clear "x" — we draw our own */
+.search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* "3 results" badge */
+.search-count {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: #3922A7;
+    background-color: #ece9fa;
+    border-radius: 999px;
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+
+.search-count:empty {
+    display: none;
+}
+
+.search-count.no-results {
+    color: #b4472a;
+    background-color: #fbe9e4;
+}
+
+/* "/" hint, shown only when empty and not focused */
+.search-hint {
+    flex-shrink: 0;
+    margin-right: 6px;
+    border: 1px solid #D8DBE0;
+    background-color: #f8f6f0;
+    color: #6b6f7b;
+}
+
+.search-box:focus-within .search-hint,
+.search-box.has-query .search-hint {
+    display: none;
+}
+
+/* Round clear button, shown only when there is text */
+.search-clear {
+    display: none;
+    flex-shrink: 0;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: #eae7df;
+    color: #555a66;
+}
+
+.search-box.has-query .search-clear {
+    display: grid;
+}
+
+.search-clear:hover {
+    background-color: #3922A7;
+    color: white;
+}
+
+/* Empty-state message inside a month column */
+.search-empty {
+    font-size: 11px;
+    color: #8a8e99;
+    text-align: center;
+    padding: 18px 8px;
+    border: 1.5px dashed #D8DBE0;
+    border-radius: 7px;
+    margin: 0;
+}
+
+/* Gently fade cards in when search results change */
+.calendar .job {
+    animation: search-fade 0.18s ease;
+}
+
+@keyframes search-fade {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .search-box,
+    .calendar .job {
+        transition: none;
+        animation: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .search-box,
+    .search-box:focus-within {
+        flex-basis: 100%;
+        margin-left: 0;
+    }
+}
+
 /* Calendar */
 .calendar {
     display: grid;
