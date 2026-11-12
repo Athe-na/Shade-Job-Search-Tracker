@@ -111,6 +111,16 @@
             </div>
 
             <div class="shortcut-row">
+                <kbd>&larr; &rarr;</kbd>
+                <span>Scroll months</span>
+            </div>
+
+            <div class="shortcut-row">
+                <kbd>T</kbd>
+                <span>Jump to today</span>
+            </div>
+
+            <div class="shortcut-row">
                 <kbd>Tab, Space</kbd>
                 <span>Move, open</span>
             </div>
@@ -125,7 +135,12 @@
         <!-- Header -->
         <header class="header">
 
-            <h2>Jul - Oct 2026</h2>
+            <div class="year-nav">
+                <button type="button" id="year-prev" class="year-arrow" aria-label="Previous year">&#8249;</button>
+                <h2 id="calendar-year" aria-live="polite">2026</h2>
+                <button type="button" id="year-next" class="year-arrow" aria-label="Next year">&#8250;</button>
+                <button type="button" id="today-btn" class="today-btn">Today</button>
+            </div>
 
             <div class="buttons">
                 <button id="settings-btn" onclick="openSettingsPanel()">
@@ -209,53 +224,13 @@
         </div>
 
 
-        <!-- Calendar -->
-        <div class="calendar">
-        <!-- </div> -->
+        <!-- Calendar: twelve month columns, filled in by displayApplicationsOnCalendar() -->
+        <div class="calendar-wrap">
+            <div class="calendar" id="calendar" tabindex="-1"></div>
 
-            <!-- July -->
-            <section class="month">
-                <h3>July 2026</h3>
-
-                <div class="job declined"></div>
-                <div class="job review"></div>
-                <div class="job qa"></div>
-                <div class="job declined"></div>
-            </section>
-
-
-            <!-- August -->
-            <section class="month">
-                <h3>August 2026</h3>
-
-                <div class="job interview"></div>
-                <div class="job review"></div>
-                <div class="job applied"></div>
-                <div class="job declined"></div>
-            </section>
-
-
-            <!-- September -->
-            <section class="month">
-                <h3>September 2026</h3>
-
-                <div class="job interview"></div>
-                <div class="job qa"></div>
-                <div class="job applied"></div>
-                <div class="job review"></div>
-            </section>
-
-
-            <!-- October -->
-            <section class="month">
-                <h3>October 2026</h3>
-
-                <div class="job applied">Testing testing</div>
-                <div class="job interview"></div>
-                <div class="job applied"></div>
-                <div class="job review"></div>
-            </section>
-
+            <!-- Scroll arrows: shown only when there are more months in that direction -->
+            <button type="button" class="scroll-arrow scroll-left" id="scroll-left" aria-label="Previous months" hidden>&#8249;</button>
+            <button type="button" class="scroll-arrow scroll-right" id="scroll-right" aria-label="Next months" hidden>&#8250;</button>
         </div>
 
     </main>

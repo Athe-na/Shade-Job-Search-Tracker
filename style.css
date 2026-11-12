@@ -363,15 +363,158 @@ button:focus-visible {
 }
 
 /* Calendar */
+/* Twelve months in a row; scroll sideways, four visible at a time. */
 .calendar {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    --months-visible: 4;
+    position: relative;
+    display: flex;
     gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #c9ccd3 transparent;
+}
+
+.calendar:focus {
+    outline: none;
 }
 
 /* Month Columns */
 .month {
+    flex: 0 0 calc((100% - (var(--months-visible) - 1) * 12px) / var(--months-visible));
     min-width: 0;
+    scroll-snap-align: start;
+}
+
+/* Current month: accent header and a soft outline around the column */
+.month.current h3 {
+    background-color: var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.now-badge {
+    font-size: 10px;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* "+ Add" in empty months */
+.month-add {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 8px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: #8a8e99;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.month-add span {
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.month-add:hover,
+.month-add:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Year switcher in the header */
+.year-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.year-nav h2 {
+    margin: 0;
+    min-width: 44px;
+    text-align: center;
+}
+
+.year-arrow {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.today-btn {
+    margin-left: 6px;
+    cursor: pointer;
+}
+
+/* Calendar scroll arrows */
+.calendar-wrap {
+    position: relative;
+    padding: 0 40px;
+}
+
+/* On larger screens the calendar fills the window, so its sideways
+   scrollbar sits at the bottom of the page. Long months scroll down inside it. */
+@media (min-width: 601px) {
+    .main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .calendar-wrap {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .calendar {
+        height: 100%;
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+}
+
+.scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(28, 31, 43, 0.18);
+}
+
+.scroll-arrow[hidden] {
+    display: none;
+}
+
+.scroll-left {
+    left: 0;
+}
+
+.scroll-right {
+    right: 0;
 }
 
 .month h3 {
@@ -455,7 +598,7 @@ button:focus-visible {
 /* Smaller Screens */
 @media (max-width: 1000px) {
     .calendar {
-        grid-template-columns: repeat(2, 1fr);
+        --months-visible: 2;
     }
 
     .header {
@@ -473,7 +616,7 @@ button:focus-visible {
     }
 
     .calendar {
-        grid-template-columns: 1fr;
+        --months-visible: 1.15;
     }
 }
 

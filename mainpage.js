@@ -225,7 +225,7 @@ function readApplicationForm() {
         document.getElementsByName("company")[0].value,
         document.getElementsByName("location")[0].value,
         document.getElementsByName("applicationLink")[0].value,
-        new Date(document.getElementsByName("dateApplied")[0].value),
+        new Date(document.getElementsByName("dateApplied")[0].value + "T00:00"),
         document.getElementsByName("appliedVia")[0].value,
         checkedStatus ? parseInt(checkedStatus.value) : 0,
     );
@@ -240,7 +240,7 @@ function fillApplicationForm(application) {
     document.getElementsByName("company")[0].value = application.company || "";
     document.getElementsByName("location")[0].value = application.location || "";
     document.getElementsByName("applicationLink")[0].value = application.applicationLink || "";
-    document.getElementsByName("dateApplied")[0].value = isNaN(application.dateApplied) ? "" : application.dateApplied.toISOString().slice(0, 10);
+    document.getElementsByName("dateApplied")[0].value = isNaN(application.dateApplied) ? "" : toLocalDateString(application.dateApplied);
     document.getElementsByName("appliedVia")[0].value = application.appliedVia || "";
 
     var statusRadio = document.querySelector('#application-form input[name="status"][value="' + application.status + '"]');
@@ -365,7 +365,7 @@ window.openApplicationPanel = function(index) {
     } else {
         editingApplicationIndex = null;
         form.reset();
-        document.getElementsByName("dateApplied")[0].value = new Date().toISOString().slice(0, 10);
+        document.getElementsByName("dateApplied")[0].value = toLocalDateString(new Date());
         title.textContent = "New application";
         deleteButton.hidden = true;
     }
@@ -557,41 +557,58 @@ function createTestData() {
     ];
 }
 
+// --- CALENDAR (YEAR VIEW) ---
+
+var MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+
+/**
+ * The year currently shown on the calendar. Starts on the current year.
+ */
+var selectedYear = new Date().getFullYear();
+
+/**
+ * Draws all twelve months of selectedYear as columns and places each application
+ * in its month. Keeps the user's scroll position so saving or searching doesn't jump.
+ */
 function displayApplicationsOnCalendar() {
-
-    // Find the calendar on the webpage.
-    var calendar = document.getElementsByClassName("calendar")[0];
-
-    console.log("Calendar element:", calendar);
-
-    // Clear existing calendar content.
+    var calendar = document.getElementById("calendar");
+    var previousScroll = calendar.scrollLeft;
     calendar.innerHTML = "";
 
-    // Create the four month sections.
-    var months = ["July", "August", "September", "October"];
+    var today = new Date();
+    var isThisYear = selectedYear === today.getFullYear();
+    document.getElementById("calendar-year").textContent = selectedYear;
 
-    months.forEach((month) => {
-
+    // Create the twelve month columns.
+    var monthSections = MONTH_NAMES.map((name, monthIndex) => {
         var monthSection = document.createElement("section");
         monthSection.classList.add("month");
+        monthSection.dataset.month = monthIndex;
+        monthSection.setAttribute("aria-label", name + " " + selectedYear);
 
         var monthHeading = document.createElement("h3");
-        monthHeading.innerHTML = month + " 2026";
+        monthHeading.textContent = name + " " + selectedYear;
+
+        if (isThisYear && monthIndex === today.getMonth()) {
+            monthSection.classList.add("current");
+            var badge = document.createElement("span");
+            badge.classList.add("now-badge");
+            badge.textContent = "This month";
+            monthHeading.appendChild(badge);
+        }
 
         monthSection.appendChild(monthHeading);
-
         calendar.appendChild(monthSection);
+        return monthSection;
     });
 
     var matchCount = 0;
+    var monthCounts = new Array(12).fill(0);
 
-    // Add each application to its corresponding month.
+    // Add each application from the selected year to its month.
     applications.forEach((application, index) => {
-
-        var monthIndex = application.dateApplied.getMonth();
-
-        // Only display applications from July through October.
-        if (monthIndex < 6 || monthIndex > 9) {
+        if (application.dateApplied.getFullYear() !== selectedYear) {
             return;
         }
 
@@ -601,7 +618,8 @@ function displayApplicationsOnCalendar() {
         }
         matchCount++;
 
-        var monthSection = calendar.children[monthIndex - 6];
+        var monthIndex = application.dateApplied.getMonth();
+        monthCounts[monthIndex]++;
 
         var jobCard = document.createElement("div");
 
@@ -626,7 +644,7 @@ function displayApplicationsOnCalendar() {
             }
         });
 
-        monthSection.appendChild(jobCard);
+        monthSections[monthIndex].appendChild(jobCard);
     });
 
     // Show how many results the search found.
@@ -638,17 +656,127 @@ function displayApplicationsOnCalendar() {
         searchCount.classList.toggle("no-results", searchQuery.trim() !== "" && matchCount === 0);
     }
 
-    // Tell the user when a month has no matches.
-    if (searchQuery.trim()) {
-        Array.from(calendar.children).forEach((monthSection) => {
-            if (monthSection.children.length === 1) {
-                var empty = document.createElement("p");
-                empty.classList.add("search-empty");
-                empty.textContent = "No matches";
-                monthSection.appendChild(empty);
-            }
-        });
+    // Empty months: say why they're empty, and offer a quick add when not searching.
+    monthSections.forEach((monthSection, monthIndex) => {
+        if (monthCounts[monthIndex] > 0) {
+            return;
+        }
+        if (searchQuery.trim()) {
+            var empty = document.createElement("p");
+            empty.classList.add("search-empty");
+            empty.textContent = "No matches";
+            monthSection.appendChild(empty);
+            return;
+        }
+
+        // One dashed box: "No applications" with a "+ Add" action inside.
+        var addButton = document.createElement("button");
+        addButton.type = "button";
+        addButton.classList.add("month-add");
+        addButton.innerHTML = "<span>No applications</span><strong>+ Add</strong>";
+        addButton.setAttribute("aria-label", "Add application in " + MONTH_NAMES[monthIndex]);
+        addButton.addEventListener("click", () => openApplicationPanelForMonth(monthIndex));
+        monthSection.appendChild(addButton);
+    });
+
+    calendar.scrollLeft = previousScroll;
+    updateScrollArrows();
+}
+
+/**
+ * Opens a new application with its date set inside the chosen month
+ * (today if it's the current month, otherwise the 1st).
+ */
+function openApplicationPanelForMonth(monthIndex) {
+    openApplicationPanel();
+    var today = new Date();
+    var date = (selectedYear === today.getFullYear() && monthIndex === today.getMonth())
+        ? today
+        : new Date(selectedYear, monthIndex, 1);
+    document.getElementsByName("dateApplied")[0].value = toLocalDateString(date);
+}
+
+/**
+ * Formats a Date as YYYY-MM-DD in local time (for date inputs).
+ */
+function toLocalDateString(date) {
+    var month = String(date.getMonth() + 1).padStart(2, "0");
+    var day = String(date.getDate()).padStart(2, "0");
+    return date.getFullYear() + "-" + month + "-" + day;
+}
+
+/**
+ * Shows the left/right scroll arrows only when there are more months in that direction.
+ */
+function updateScrollArrows() {
+    var calendar = document.getElementById("calendar");
+    var maxScroll = calendar.scrollWidth - calendar.clientWidth;
+    document.getElementById("scroll-left").hidden = calendar.scrollLeft <= 2;
+    document.getElementById("scroll-right").hidden = calendar.scrollLeft >= maxScroll - 2;
+}
+
+/**
+ * Scrolls the calendar to the given month.
+ * alignEnd: true puts the month as the last visible column (past months to its left);
+ * false puts it as the first visible column.
+ */
+function scrollToMonth(monthIndex, smooth = true, alignEnd = false) {
+    var calendar = document.getElementById("calendar");
+    var monthSection = calendar.children[monthIndex];
+    if (!monthSection) {
+        return;
     }
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var left = alignEnd
+        ? monthSection.offsetLeft + monthSection.offsetWidth - calendar.clientWidth
+        : monthSection.offsetLeft;
+    calendar.scrollTo({
+        left: Math.max(0, left),
+        behavior: smooth && !reduceMotion ? "smooth" : "auto"
+    });
+}
+
+/**
+ * Scrolls the calendar by one month column. direction: -1 (back) or 1 (forward).
+ */
+function scrollByMonth(direction) {
+    var calendar = document.getElementById("calendar");
+    var monthWidth = calendar.children[0] ? calendar.children[0].offsetWidth + 12 : calendar.clientWidth / 4;
+    calendar.scrollBy({ left: direction * monthWidth, behavior: "smooth" });
+}
+
+/**
+ * Switches the calendar to a different year.
+ */
+function changeYear(delta) {
+    selectedYear += delta;
+    displayApplicationsOnCalendar();
+    scrollToMonth(0, false);
+}
+
+/**
+ * Jumps back to the current year and scrolls to the current month.
+ */
+function goToToday() {
+    var today = new Date();
+    if (selectedYear !== today.getFullYear()) {
+        selectedYear = today.getFullYear();
+        displayApplicationsOnCalendar();
+    }
+    scrollToMonth(today.getMonth(), true, true);
+}
+
+/**
+ * Hooks up the year arrows, Today button, and scroll tracking.
+ */
+function setUpCalendarNavigation() {
+    document.getElementById("year-prev").addEventListener("click", () => changeYear(-1));
+    document.getElementById("year-next").addEventListener("click", () => changeYear(1));
+    document.getElementById("today-btn").addEventListener("click", goToToday);
+    document.getElementById("scroll-left").addEventListener("click", () => scrollByMonth(-1));
+    document.getElementById("scroll-right").addEventListener("click", () => scrollByMonth(1));
+    document.getElementById("calendar").addEventListener("scroll", updateScrollArrows, { passive: true });
+    window.addEventListener("resize", updateScrollArrows);
 }
 
 function homeKeyboardEventListeners(e) {
@@ -657,6 +785,19 @@ function homeKeyboardEventListeners(e) {
         e.preventDefault();
         document.getElementById("search-input").focus();
         return;
+    }
+    // Arrow keys scroll months; T jumps to today (when not typing or focused on a control).
+    var typing = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName);
+    if (!typing && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key == "ArrowLeft" || e.key == "ArrowRight") {
+            e.preventDefault();
+            scrollByMonth(e.key == "ArrowLeft" ? -1 : 1);
+            return;
+        }
+        if (e.key == "t" || e.key == "T") {
+            goToToday();
+            return;
+        }
     }
     if (e.key == "q" && e.altKey) {
         console.log("Keyboard shortcut: Creating new application.");
@@ -821,7 +962,9 @@ function initialize() {
     currentlyDisplayedApplications = applications;
 
     setUpSearchBar();
+    setUpCalendarNavigation();
     displayApplicationsOnCalendar();
+    scrollToMonth(new Date().getMonth(), false, true);
     displayApplicationsInConsole();
     addHomeKeyboardEventListeners();
     addDebugResetKey();
