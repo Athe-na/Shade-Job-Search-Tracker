@@ -153,6 +153,47 @@ function setUpSearchBar() {
     });
 }
 
+// null means "All". Values match the form's status radios (4 = Accepted, 5 = Declined).
+var statusFilter = null;
+
+var STATUS_FILTER_VALUES = {
+    all: null,
+    applied: 0,
+    review: 1,
+    qa: 2,
+    interview: 3,
+    accepted: 4,
+    declined: 5
+};
+
+function applicationMatchesStatusFilter(application) {
+    return statusFilter === null || Number(application.status) === statusFilter;
+}
+
+function selectStatusFilter(button) {
+    document.querySelectorAll("#filters button[data-status]").forEach((b) => {
+        var isActive = b === button;
+        b.classList.toggle("active-filter", isActive);
+        b.setAttribute("aria-pressed", isActive);
+    });
+    statusFilter = STATUS_FILTER_VALUES[button.dataset.status] ?? null;
+    displayApplicationsOnCalendar();
+}
+
+function setUpStatusFilters() {
+    document.querySelectorAll("#filters button[data-status]").forEach((button) => {
+        button.type = "button";
+        button.setAttribute("aria-pressed", button.classList.contains("active-filter"));
+        button.addEventListener("click", () => selectStatusFilter(button));
+    });
+}
+
+function cycleStatusFilter() {
+    var buttons = Array.from(document.querySelectorAll("#filters button[data-status]"));
+    var current = buttons.findIndex((b) => b.classList.contains("active-filter"));
+    selectStatusFilter(buttons[(current + 1) % buttons.length]);
+}
+
 function sortApplicationsByStatus(inputApplications, bAscending) {
     return inputApplications.toSorted((a, b) => bAscending ? a.status - b.status : b.status - a.status);
 }
@@ -616,6 +657,9 @@ function displayApplicationsOnCalendar() {
         if (!applicationMatchesSearch(application, searchQuery)) {
             return;
         }
+        if (!applicationMatchesStatusFilter(application)) {
+            return;
+        }
         matchCount++;
 
         var monthIndex = application.dateApplied.getMonth();
@@ -661,7 +705,7 @@ function displayApplicationsOnCalendar() {
         if (monthCounts[monthIndex] > 0) {
             return;
         }
-        if (searchQuery.trim()) {
+        if (searchQuery.trim() || statusFilter !== null) {
             var empty = document.createElement("p");
             empty.classList.add("search-empty");
             empty.textContent = "No matches";
@@ -806,8 +850,9 @@ function homeKeyboardEventListeners(e) {
         refreshYourSearchSummary();
     }
     if (e.key == "s" && e.altKey) {
-        console.log("Keyboard shortcut: Sorting applications by status.");
-        sortApplicationsByStatus(applications);
+        e.preventDefault();
+        console.log("Keyboard shortcut: Cycling status filter.");
+        cycleStatusFilter();
     }
     if (e.key == "a" && e.altKey) {
         console.log("Keyboard shortcut: Opening analytics panel.");
@@ -962,6 +1007,7 @@ function initialize() {
     currentlyDisplayedApplications = applications;
 
     setUpSearchBar();
+    setUpStatusFilters();
     setUpCalendarNavigation();
     displayApplicationsOnCalendar();
     scrollToMonth(new Date().getMonth(), false, true);
