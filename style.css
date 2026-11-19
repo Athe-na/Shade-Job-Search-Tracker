@@ -898,8 +898,8 @@ button:focus-visible {
 }
 
 /* Outcome step: fills with whichever outcome is picked */
-.step-outcome:has(input[value="4"]:checked) { --oc: #4d9865; }
-.step-outcome:has(input[value="5"]:checked) { --oc: #c45b3a; }
+.step-outcome:has(input[value="5"]:checked) { --oc: #4d9865; }
+.step-outcome:has(input[value="4"]:checked) { --oc: #c45b3a; }
 
 .step-outcome:has(input:checked) .step-row .step-circle {
     background-color: var(--oc);
