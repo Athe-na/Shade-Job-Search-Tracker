@@ -591,8 +591,8 @@ button:focus-visible {
 }
 
 .status-teal {
-    background-color: #3d8f84;
-    border-color: #6b8885;
+    background-color: #4fbdae81;
+    border-color: #4fbdae;
 }
 
 /* Smaller Screens */
@@ -1085,7 +1085,7 @@ button:focus-visible {
 .changed {
     font-size: 12px;
     font-weight: 700;
-    color: #3d8f84;
+    color: #4fbdae;
 }
 
 .footer-strong {
