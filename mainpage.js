@@ -1,4 +1,4 @@
-// Authored by Athena O, Folake Oluewu, Elda Shatro, [add your name here if you work on this]
+// Authored by Athena O, Folake Oluewu, Elda Shatro, Z Wang [add your name here if you work on this]
 
 class Application {
 
@@ -224,6 +224,8 @@ function updateAnalyticsPage() {
     // call all the component analytics update functions
     updateSummary();
     updateStatusBreakdown();
+    updateWhereApplied();
+    updateApplicationsPerMonth();
 }
 
 function updateSummary() {
@@ -233,6 +235,7 @@ function updateSummary() {
     summaries[2].innerHTML = filterApplicationsByStatus(applications, 5, true).length; // Applications that were accepted.
     summaries[3].innerHTML = Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) + "%"; // Response rate.
 }
+
 
 function updateStatusBreakdown() {
     var stackedBar = document.getElementsByClassName("stacked-bar")[0].children;
@@ -244,8 +247,142 @@ function updateStatusBreakdown() {
     var declinedCount = filterApplicationsByStatusMatch(applications, 4).length;
     var acceptedCount = filterApplicationsByStatusMatch(applications, 5).length;
 
-    stackedBar[0].style = toString("flex: " + appliedCount + "; backgroundColor: #7665d9");
+    var counts = [
+        appliedCount,
+        reviewedCount,
+        qaCount,
+        interviewCount,
+        declinedCount,
+        acceptedCount
+    ];
+
+    var legend = document.querySelectorAll(".breakdown-legend strong");
+
+    for (var i = 0; i < counts.length; i++) {
+        stackedBar[i].style.flex = counts[i];
+        legend[i].textContent = counts[i];
+    }
 }
+
+function updateWhereApplied() {
+    var rows = document.getElementsByClassName("hbar-row");
+
+    var linkedinCount = 0;
+    var companyCount = 0;
+    var indeedCount = 0;
+    var handshakeCount = 0;
+    var otherCount = 0; // NEW
+
+    applications.forEach((application) => {
+        var source = (application.appliedVia || "").toLowerCase().trim();
+
+        if (source === "linkedin") {
+            linkedinCount++;
+        } else if (source === "company website") {
+            companyCount++;
+        } else if (source === "indeed") {
+            indeedCount++;
+        } else if (source === "handshake") {
+            handshakeCount++;
+        } else {
+            otherCount++; // NEW
+        }
+    });
+
+    var counts = [
+        linkedinCount,
+        companyCount,
+        indeedCount,
+        handshakeCount,
+        otherCount // NEW
+    ];
+
+    var maxCount = Math.max(1, ...counts);
+
+    for (var i = 0; i < counts.length; i++) {
+        rows[i].querySelector("strong").textContent = counts[i];
+
+        rows[i].querySelector(".hbar-fill").style.width =
+            (counts[i] / maxCount * 100) + "%";
+    }
+}
+
+
+var analyticsMonthPage = 0;
+
+function updateApplicationsPerMonth() {
+    var chart = document.querySelector(".month-chart");
+    var counts = Array(12).fill(0);
+
+    // Count applications for all 12 months
+    applications.forEach((application) => {
+        var date = new Date(application.dateApplied);
+
+        if (date.getFullYear() === selectedYear) {
+            counts[date.getMonth()]++;
+        }
+    });
+
+    var maxCount = Math.max(1, ...counts);
+
+    var months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+
+    chart.innerHTML = "";
+
+    // Display only 4 months at a time
+    var start = analyticsMonthPage * 4;
+    var end = start + 4;
+
+    for (var i = start; i < end; i++) {
+        var bar = document.createElement("div");
+        bar.className = "month-bar";
+
+        var count = document.createElement("strong");
+        count.textContent = counts[i];
+
+        var fill = document.createElement("span");
+        fill.className = "month-fill";
+        fill.style.height = (counts[i] / maxCount * 110) + "px";
+
+        var label = document.createElement("span");
+        label.className = "month-label";
+        label.textContent = months[i];
+
+        bar.append(count, fill, label);
+        chart.appendChild(bar);
+    }
+
+    // Disable arrows at the beginning and end
+    document.getElementById("month-prev").disabled =
+        analyticsMonthPage === 0;
+
+    document.getElementById("month-next").disabled =
+        analyticsMonthPage === 2;
+
+    chart.setAttribute(
+        "aria-label",
+        "Applications from " + months[start] +
+        " to " + months[end - 1] +
+        " in " + selectedYear
+    );
+}
+document.getElementById("month-prev").addEventListener("click", () => {
+    if (analyticsMonthPage > 0) {
+        analyticsMonthPage--;
+        updateApplicationsPerMonth();
+    }
+});
+
+document.getElementById("month-next").addEventListener("click", () => {
+    if (analyticsMonthPage < 2) {
+        analyticsMonthPage++;
+        updateApplicationsPerMonth();
+    }
+});
+
 
 
 // --- BUTTON FUNCTIONALITY --- 
