@@ -214,7 +214,7 @@ function refreshYourSearchSummary() {
     // Fill in info
     totalApplicationsField.innerHTML = applications.length;
     reachedInterviewField.innerHTML = filterApplicationsByStatus(applications, 3, true).length;
-    declinedField.innerHTML = filterApplicationsByStatus(applications, 5, true).length;
+    declinedField.innerHTML = filterApplicationsByStatusMatch(applications, 4).length;
 }
 
 
