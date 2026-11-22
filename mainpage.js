@@ -59,6 +59,37 @@ var colorScheme = [
     "status-red"
 ];
 
+
+function updateSidebarColorKey() {
+    const statusDots = [
+        ".applied-dot",
+        ".review-dot",
+        ".qa-dot",
+        ".interview-dot",
+        ".declined-dot",
+        ".accepted-dot"
+    ];
+
+    const colorValues = {
+        "status-purple": "#7665d9",
+        "status-blue": "#3a9ee6",
+        "status-yellow": "#C7A42B",
+        "status-orange": "#D89A31",
+        "status-red": "#C45B3A",
+        "status-green": "#4D9865",
+        "status-teal": "#4fbdae"
+    };
+
+    statusDots.forEach((selector, index) => {
+        const dot = document.querySelector(selector);
+
+        if (dot) {
+            dot.style.backgroundColor =
+                colorValues[colorScheme[index]] || "#7665d9";
+        }
+    });
+}
+
 /**
  * Filtering function for the applications array by date.
  * @param {Array[Application]} inputApplications - The applications to filter.
@@ -493,6 +524,7 @@ window.saveSettings = function() {
     colorScheme[4] = document.querySelector('input[name="color-declined"]:checked').value;
     colorScheme[5] = document.querySelector('input[name="color-accepted"]:checked').value;
     saveColorSchemeToLocalStorage();
+    updateSidebarColorKey();
     closeSettingsPanel();
 }
 
@@ -1133,6 +1165,7 @@ function initialize() {
     // Perform startup taks.
     getDataFromLocalStorage();
     getColorSchemeFromLocalStorage();
+    updateSidebarColorKey();
 
     // Only create test data if no applications exist.
     if (applications.length === 0) {
