@@ -10,7 +10,7 @@ class Application {
      * @param {string} applicationLink 
      * @param {Date} dateApplied - The date applied. Pass a date object.
      * @param {string} appliedVia 
-     * @param {int} status - The status of the application. Ranges from 0 to 5. 0: Applied. 1: Under Review. 2: QA. 3: Interview. 4: Accepted. 5: Rejected.
+     * @param {int} status - The status of the application. Ranges from 0 to 5. 0: Applied. 1: Under Review. 2: QA. 3: Interview. 4: Declined. 5: Accepted.
      * 
      */
     
@@ -59,8 +59,8 @@ var colorScheme = [
     "status-blue",
     "status-yellow",
     "status-orange",
-    "status-green",
-    "status-red"
+    "status-red",
+    "status-green"
 ];
 
 
@@ -114,6 +114,14 @@ function filterApplicationsByDate(inputApplications, date, bAfter) {
  */
 function filterApplicationsByStatus(inputApplications, status, bAfter) {
     return inputApplications.filter((application) => bAfter ? application.status >= status : application.status <= status);
+}
+
+/**
+ * Counts applications that reached an interview: Interview (3) or Accepted (5).
+ * Declined (4) is excluded because a decline can happen before any interview.
+ */
+function countReachedInterview(inputApplications) {
+    return inputApplications.filter((application) => application.status == 3 || application.status == 5).length;
 }
 
 function filterApplicationsByStatusMatch(inputApplications, status) {
@@ -188,7 +196,7 @@ function setUpSearchBar() {
     });
 }
 
-// null means "All". Values match the form's status radios (4 = Accepted, 5 = Declined).
+// null means "All". Values match the form's status radios (4 = Declined, 5 = Accepted).
 var statusFilter = null;
 
 var STATUS_FILTER_VALUES = {
@@ -197,8 +205,8 @@ var STATUS_FILTER_VALUES = {
     review: 1,
     qa: 2,
     interview: 3,
-    accepted: 4,
-    declined: 5
+    declined: 4,
+    accepted: 5
 };
 
 function applicationMatchesStatusFilter(application) {
@@ -248,7 +256,7 @@ function refreshYourSearchSummary() {
 
     // Fill in info
     totalApplicationsField.innerHTML = applications.length;
-    reachedInterviewField.innerHTML = filterApplicationsByStatus(applications, 3, true).length;
+    reachedInterviewField.innerHTML = countReachedInterview(applications);
     declinedField.innerHTML = filterApplicationsByStatusMatch(applications, 4).length;
 }
 
@@ -266,9 +274,9 @@ function updateAnalyticsPage() {
 function updateSummary() {
     var summaries = document.getElementsByClassName("summary-number");
     summaries[0].innerHTML = applications.length; // Set the total number of applications.
-    summaries[1].innerHTML = filterApplicationsByStatus(applications, 3, true).length; // Applications that reached interview.
+    summaries[1].innerHTML = countReachedInterview(applications); // Applications that reached interview.
     summaries[2].innerHTML = filterApplicationsByStatus(applications, 5, true).length; // Applications that were accepted.
-    summaries[3].innerHTML = Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) + "%"; // Response rate.
+    summaries[3].innerHTML = (applications.length ? Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) : 0) + "%"; // Response rate. Shows 0% when there are no applications.
 }
 
 
