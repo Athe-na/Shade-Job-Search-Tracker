@@ -276,7 +276,7 @@ function updateSummary() {
     summaries[0].innerHTML = applications.length; // Set the total number of applications.
     summaries[1].innerHTML = countReachedInterview(applications); // Applications that reached interview.
     summaries[2].innerHTML = filterApplicationsByStatus(applications, 5, true).length; // Applications that were accepted.
-    summaries[3].innerHTML = Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) + "%"; // Response rate.
+    summaries[3].innerHTML = (applications.length ? Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) : 0) + "%"; // Response rate. Shows 0% when there are no applications.
 }
 
 
