@@ -116,6 +116,14 @@ function filterApplicationsByStatus(inputApplications, status, bAfter) {
     return inputApplications.filter((application) => bAfter ? application.status >= status : application.status <= status);
 }
 
+/**
+ * Counts applications that reached an interview: Interview (3) or Accepted (5).
+ * Declined (4) is excluded because a decline can happen before any interview.
+ */
+function countReachedInterview(inputApplications) {
+    return inputApplications.filter((application) => application.status == 3 || application.status == 5).length;
+}
+
 function filterApplicationsByStatusMatch(inputApplications, status) {
     return inputApplications.filter((application) => application.status == status);
 }
@@ -248,7 +256,7 @@ function refreshYourSearchSummary() {
 
     // Fill in info
     totalApplicationsField.innerHTML = applications.length;
-    reachedInterviewField.innerHTML = filterApplicationsByStatus(applications, 3, true).length;
+    reachedInterviewField.innerHTML = countReachedInterview(applications);
     declinedField.innerHTML = filterApplicationsByStatusMatch(applications, 4).length;
 }
 
@@ -266,7 +274,7 @@ function updateAnalyticsPage() {
 function updateSummary() {
     var summaries = document.getElementsByClassName("summary-number");
     summaries[0].innerHTML = applications.length; // Set the total number of applications.
-    summaries[1].innerHTML = filterApplicationsByStatus(applications, 3, true).length; // Applications that reached interview.
+    summaries[1].innerHTML = countReachedInterview(applications); // Applications that reached interview.
     summaries[2].innerHTML = filterApplicationsByStatus(applications, 5, true).length; // Applications that were accepted.
     summaries[3].innerHTML = Math.round(filterApplicationsByStatus(applications, 2, true).length / applications.length * 100) + "%"; // Response rate.
 }
