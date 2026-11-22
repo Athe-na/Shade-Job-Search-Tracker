@@ -647,24 +647,24 @@ window.closeDeleteConfirm = function() {
 /**
  * Attempts to retrieve the stored application data if it exists.
  */
+
 function getDataFromLocalStorage() {
-    // Check if there is data for "applications" in localStorage.
     var locallyStoredApplicationsJSON = localStorage.getItem("applications");
+
     if (locallyStoredApplicationsJSON) {
-        // If so, pass it into the applications array.
         applications = JSON.parse(locallyStoredApplicationsJSON);
 
-        // Convert saved date strings back into Date objects.
         applications.forEach((application) => {
             application.dateApplied = new Date(application.dateApplied);
         });
 
-        console.log("Retrieved data from localStorage and passed it into the applications array.");
-        return;
+        console.log("Retrieved applications from localStorage.");
+    } else {
+        applications = [];
+        console.log("No saved applications found.");
     }
-    // If not, print a message to the console.
-    console.log("No item to retrieve under \"applications\".");
 }
+
 
 /**
  * Stringifies the applications array as a JSON object and places it into localStorage, overriding the previous value.
@@ -805,6 +805,7 @@ var selectedYear = new Date().getFullYear();
  * Draws all twelve months of selectedYear as columns and places each application
  * in its month. Keeps the user's scroll position so saving or searching doesn't jump.
  */
+
 function displayApplicationsOnCalendar() {
     var calendar = document.getElementById("calendar");
     var previousScroll = calendar.scrollLeft;
@@ -826,6 +827,7 @@ function displayApplicationsOnCalendar() {
 
         if (isThisYear && monthIndex === today.getMonth()) {
             monthSection.classList.add("current");
+
             var badge = document.createElement("span");
             badge.classList.add("now-badge");
             badge.textContent = "This month";
@@ -834,14 +836,29 @@ function displayApplicationsOnCalendar() {
 
         monthSection.appendChild(monthHeading);
         calendar.appendChild(monthSection);
+
         return monthSection;
     });
 
     var matchCount = 0;
     var monthCounts = new Array(12).fill(0);
 
+    // Sort applications by Date Applied (oldest first).
+    // Preserve original indexes so job cards open correctly.
+    var sortedApplications = applications
+        .map((application, index) => ({
+            application,
+            index
+        }))
+        .sort((a, b) => {
+            return new Date(a.application.dateApplied) -
+                   new Date(b.application.dateApplied);
+        });
+
     // Add each application from the selected year to its month.
-    applications.forEach((application, index) => {
+    sortedApplications.forEach(({ application, index }) => {
+
+        // Only show applications from the selected year.
         if (application.dateApplied.getFullYear() !== selectedYear) {
             return;
         }
@@ -850,30 +867,51 @@ function displayApplicationsOnCalendar() {
         if (!applicationMatchesSearch(application, searchQuery)) {
             return;
         }
+
+        // Skip applications that don't match the status filter.
         if (!applicationMatchesStatusFilter(application)) {
             return;
         }
+
         matchCount++;
 
         var monthIndex = application.dateApplied.getMonth();
         monthCounts[monthIndex]++;
 
+        // Create job card.
         var jobCard = document.createElement("div");
 
-        // Match the application status to its CSS class. Uses the colorScheme array.
-        jobCard.classList.add("job", colorScheme[application.status]);
+        // Match application status to its CSS color class.
+        jobCard.classList.add(
+            "job",
+            colorScheme[application.status]
+        );
 
+        // Job position title.
         var titleElement = document.createElement("h4");
         titleElement.textContent = application.positionTitle;
+
+        // Company name.
         var companyElement = document.createElement("p");
         companyElement.textContent = application.company;
+
         jobCard.append(titleElement, companyElement);
 
-        // Clicking (or pressing Enter/Space on) a card opens that application's details.
+        // Clicking a card opens that application's details.
         jobCard.tabIndex = 0;
         jobCard.setAttribute("role", "button");
-        jobCard.setAttribute("aria-label", "View " + application.positionTitle + " at " + application.company);
-        jobCard.addEventListener("click", () => openApplicationDetails(index));
+
+        jobCard.setAttribute(
+            "aria-label",
+            "View " + application.positionTitle +
+            " at " + application.company
+        );
+
+        jobCard.addEventListener("click", () => {
+            openApplicationDetails(index);
+        });
+
+        // Allow keyboard navigation.
         jobCard.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -881,44 +919,73 @@ function displayApplicationsOnCalendar() {
             }
         });
 
+        // Add the job to its correct month.
         monthSections[monthIndex].appendChild(jobCard);
     });
 
     // Show how many results the search found.
     var searchCount = document.getElementById("search-count");
+
     if (searchCount) {
         searchCount.textContent = searchQuery.trim()
-            ? (matchCount === 0 ? "No results" : matchCount + (matchCount === 1 ? " result" : " results"))
+            ? (
+                matchCount === 0
+                    ? "No results"
+                    : matchCount +
+                      (matchCount === 1 ? " result" : " results")
+              )
             : "";
-        searchCount.classList.toggle("no-results", searchQuery.trim() !== "" && matchCount === 0);
+
+        searchCount.classList.toggle(
+            "no-results",
+            searchQuery.trim() !== "" && matchCount === 0
+        );
     }
 
-    // Empty months: say why they're empty, and offer a quick add when not searching.
+    // Handle empty months.
     monthSections.forEach((monthSection, monthIndex) => {
+
         if (monthCounts[monthIndex] > 0) {
             return;
         }
+
+        // Show "No matches" when filtering or searching.
         if (searchQuery.trim() || statusFilter !== null) {
             var empty = document.createElement("p");
             empty.classList.add("search-empty");
             empty.textContent = "No matches";
+
             monthSection.appendChild(empty);
             return;
         }
 
-        // One dashed box: "No applications" with a "+ Add" action inside.
+        // Add button for months with no applications.
         var addButton = document.createElement("button");
         addButton.type = "button";
         addButton.classList.add("month-add");
-        addButton.innerHTML = "<span>No applications</span><strong>+ Add</strong>";
-        addButton.setAttribute("aria-label", "Add application in " + MONTH_NAMES[monthIndex]);
-        addButton.addEventListener("click", () => openApplicationPanelForMonth(monthIndex));
+
+        addButton.innerHTML =
+            "<span>No applications</span><strong>+ Add</strong>";
+
+        addButton.setAttribute(
+            "aria-label",
+            "Add application in " + MONTH_NAMES[monthIndex]
+        );
+
+        addButton.addEventListener("click", () => {
+            openApplicationPanelForMonth(monthIndex);
+        });
+
         monthSection.appendChild(addButton);
     });
 
+    // Restore calendar scroll position.
     calendar.scrollLeft = previousScroll;
+
+    // Update left/right scroll arrows.
     updateScrollArrows();
 }
+
 
 /**
  * Opens a new application with its date set inside the chosen month
@@ -1214,3 +1281,18 @@ function initialize() {
 
 window.onload = initialize;
 //window.applications = applications;
+
+/* Automatically sync applications across Shade tabs */
+window.addEventListener("storage", function(event) {
+
+    if (event.key === "applications") {
+
+        // Load the newest applications
+        getDataFromLocalStorage();
+
+        // Refresh the calendar
+        displayApplicationsOnCalendar();
+
+        console.log("Shade applications synced across tabs.");
+    }
+});
