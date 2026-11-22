@@ -13,16 +13,20 @@ class Application {
      * @param {int} status - The status of the application. Ranges from 0 to 5. 0: Applied. 1: Under Review. 2: QA. 3: Interview. 4: Accepted. 5: Rejected.
      * 
      */
-    constructor(positionTitle, company, location, applicationLink, dateApplied, appliedVia, status) {
-        this.positionTitle = positionTitle; // String
-        this.company = company; // String
-        this.location = location; // String
-        this.applicationLink = applicationLink; // String
-        this.dateApplied = dateApplied; // Date
+    
+    constructor(positionTitle, company, location, applicationLink, dateApplied, appliedVia, status, notes = "") {
+        this.positionTitle = positionTitle;
+        this.company = company;
+        this.location = location;
+        this.applicationLink = applicationLink;
+        this.dateApplied = dateApplied;
         this.appliedVia = appliedVia;
-        this.status = status; // Int
+        this.status = status;
+        this.notes = notes;
+
         return this;
     }
+
 
     /**
      * Compares the dates of the calling Application and the the passed in Application.
@@ -429,6 +433,7 @@ var editingApplicationIndex = null;
  */
 function readApplicationForm() {
     var checkedStatus = document.querySelector('#application-form input[name="status"]:checked');
+
     return new Application(
         document.getElementsByName("positionTitle")[0].value,
         document.getElementsByName("company")[0].value,
@@ -437,6 +442,7 @@ function readApplicationForm() {
         new Date(document.getElementsByName("dateApplied")[0].value + "T00:00"),
         document.getElementsByName("appliedVia")[0].value,
         checkedStatus ? parseInt(checkedStatus.value) : 0,
+        document.getElementById("application-notes").value
     );
 }
 

@@ -793,6 +793,31 @@ button:focus-visible {
     color: #222222;
 }
 
+
+/* Notes spans both columns */
+.field-grid .notes-field {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.notes-field textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background-color: var(--surface);
+    font-family: 'Arimo', Arial, sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.notes-field textarea:focus {
+    outline: 2px solid #3922A7;
+    outline-offset: 1px;
+}
+
 /* Applied Via Dropdown */
 .field select {
     width: 100%;
