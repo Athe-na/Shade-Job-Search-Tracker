@@ -450,7 +450,25 @@ function fillApplicationForm(application) {
     document.getElementsByName("location")[0].value = application.location || "";
     document.getElementsByName("applicationLink")[0].value = application.applicationLink || "";
     document.getElementsByName("dateApplied")[0].value = isNaN(application.dateApplied) ? "" : toLocalDateString(application.dateApplied);
-    document.getElementsByName("appliedVia")[0].value = application.appliedVia || "";
+    
+    const appliedViaSelect = document.getElementById("applied-via");
+    const savedSource = application.appliedVia || "";
+
+    const matchingOption = Array.from(appliedViaSelect.options)
+        .find(option =>
+            option.value.toLowerCase() === savedSource.toLowerCase()
+        );
+
+    if (matchingOption) {
+        appliedViaSelect.value = matchingOption.value;
+    } else if (savedSource) {
+        const customOption = new Option(savedSource, savedSource);
+        appliedViaSelect.add(customOption);
+        appliedViaSelect.value = savedSource;
+    } else {
+        appliedViaSelect.value = "";
+    }
+
 
     var statusRadio = document.querySelector('#application-form input[name="status"][value="' + application.status + '"]');
     if (statusRadio) {
